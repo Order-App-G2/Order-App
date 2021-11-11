@@ -6,7 +6,6 @@ import jwt
 import datetime
 from flask_migrate import Migrate
 
-
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '0fed4204af728cc75af855673b710ce4'
 
@@ -18,6 +17,9 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
 
+# db.create_all()
+
+
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     public_id = db.Column(db.String(255), unique=True)
@@ -25,20 +27,25 @@ class User(db.Model):
     username = db.Column(db.String(255), unique=True)
     password = db.Column(db.String(255), nullable=False)
     products = db.relationship('Product', backref='owner', lazy=True)
-    user_role = db.Column(db.Integer, db.ForeignKey('roles.id'), nullable=False)
 
-    def __init__(self, public_id, email, username, password, user_role):
+    user_role_id = db.Column(db.Integer, db.ForeignKey('roles.id'), nullable=False)
+
+    def __init__(self, public_id, email, username, password, user_role_id):
         self.public_id = public_id
         self.email = email
         self.username = username
         self.password = password
-        self.user_role = user_role
+        self.user_role_id = user_role_id
 
 
 class Roles(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     role = db.Column(db.String, unique=True, nullable=False)
+
     user_role = db.relationship('User', backref='role', lazy=True)
+
+    def __init__(self, role):
+        self.role = role
 
 
 class Product(db.Model):
@@ -46,6 +53,7 @@ class Product(db.Model):
     title = db.Column(db.String(255), nullable=False)
     content = db.Column(db.Text, nullable=False)
     price = db.Column(db.Integer, nullable=False)
+
     user_id = db.Column(db.String(255), db.ForeignKey('user.public_id'), nullable=False)
 
     def __init__(self, title, content, price, user_id):
@@ -64,7 +72,8 @@ def create_user():
     password = data['password']
     email = data['email']
 
-    new_user = User(public_id=str(uuid.uuid4()), email=email, username=username, password=hashed_password, user_role=1)
+    new_user = User(public_id=str(uuid.uuid4()), email=email, username=username, password=hashed_password,
+                    user_role_id=1)
 
     if not username or not password:
         return jsonify({"message": "parameter must be filled"}), 400
@@ -88,7 +97,8 @@ def create_admin():
     password = data['password']
     email = data['email']
 
-    new_user = User(public_id=str(uuid.uuid4()), email=email, username=username, password=hashed_password, user_role=2)
+    new_user = User(public_id=str(uuid.uuid4()), email=email, username=username, password=hashed_password,
+                    user_role_id=2)
     if not username or not password:
         return jsonify({"message": "parameter must be filled"}), 400
     if User.query.filter_by(username=username).first():
@@ -102,26 +112,42 @@ def create_admin():
     return jsonify({'message': 'new admin has been created'})
 
 
-# get all users
+# get all users and their role
 @app.route('/user', methods=['GET'])
 def get_all_users():
-    users = User.query.all()
+    q = db.session.query(User.username,
+                         User.email,
+                         Roles.role
+                         ).join(Roles, User.user_role_id == Roles.id).all()
     output = []
-    for user in users:
-        user_data = {'public_id': user.public_id, 'name': user.username, 'password': user.password, 'admin': Roles.user_role}
-        output.append(user_data)
+    for user in q:
+        user_data = {
+            'username': user.username,
+            'email': user.email,
+            'role': user.role
+        }
 
+        output.append(user_data)
     return jsonify({'users': output})
 
 
 @app.route('/user/<public_id>', methods=['GET'])
 def get_one_user(public_id):
-    user = User.query.filter_by(public_id=public_id).first()
+    q = db.session.query(User.username,
+                         User.email,
+                         User.public_id,
+                         Roles.role,
+                         ).join(Roles, User.user_role_id == Roles.id). \
+        filter(User.public_id == public_id).first()
 
-    if not user:
+    # user = User.query.filter_by(public_id=public_id).first()
+
+    if not q:
         return jsonify({'message': 'no user found '})
 
-    user_data = {'public_id': user.public_id, 'name': user.username, 'password': user.password, 'admin': user.admin}
+    user_data = {'public_id': q.public_id,
+                 'name': q.username,
+                 'role': q.role}
     return jsonify({'user': user_data})
 
 
