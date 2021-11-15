@@ -17,9 +17,6 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
 
-# db.create_all()
-
-
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     public_id = db.Column(db.String(255), unique=True)
@@ -139,8 +136,6 @@ def get_one_user(public_id):
                          Roles.role,
                          ).join(Roles, User.user_role_id == Roles.id). \
         filter(User.public_id == public_id).first()
-
-    # user = User.query.filter_by(public_id=public_id).first()
 
     if not q:
         return jsonify({'message': 'no user found '})
