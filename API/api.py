@@ -52,14 +52,24 @@ class Product(db.Model):
     price = db.Column(db.Integer, nullable=False)
 
     user_id = db.Column(db.String(255), db.ForeignKey('user.public_id'), nullable=False)
+    product_category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
 
-    def __init__(self, title, content, price, user_id):
+    def __init__(self, title, content, price, user_id, product_category_id):
         self.title = title
         self.content = content
         self.price = price
         self.user_id = user_id
+        self.product_category_id = product_category_id
 
 
+class Category(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255), nullable=False)
+
+    category_product = db.relationship('Product', backref='role', lazy=True)
+
+
+# routes
 # create non admin user
 @app.route('/createUser', methods=['POST'])
 def create_user():
@@ -69,7 +79,10 @@ def create_user():
     password = data['password']
     email = data['email']
 
-    new_user = User(public_id=str(uuid.uuid4()), email=email, username=username, password=hashed_password,
+    new_user = User(public_id=str(uuid.uuid4()),
+                    email=email,
+                    username=username,
+                    password=hashed_password,
                     user_role_id=1)
 
     if not username or not password:
@@ -114,13 +127,15 @@ def create_admin():
 def get_all_users():
     q = db.session.query(User.username,
                          User.email,
-                         Roles.role
+                         Roles.role,
+                         User.public_id
                          ).join(Roles, User.user_role_id == Roles.id).all()
     output = []
     for user in q:
         user_data = {
             'username': user.username,
             'email': user.email,
+            'public_id': user.public_id,
             'role': user.role
         }
 
@@ -200,6 +215,11 @@ def get_all_products():
     return jsonify({'product': output})
 
 
+@app.route('/')
+def hello():
+    return jsonify({'hello': 'world'})
+
+
 # need to fix this after we have auth function
 # add new product
 @app.route('/addProduct', methods=['POST'])
@@ -208,14 +228,21 @@ def new_product():
     title = data['title']
     content = data['content']
     user_id = data['user_id']
+    price = data['price']
+    category = data['category']
 
     if not title or not content or not user_id:
         return jsonify({'message': 'all parameters must be filled'})
     else:
-        product = Product(title=title, content=content, user_id=user_id)
+        product = Product(title=title, content=content, price=price, user_id=user_id, product_category_id=category)
         db.session.add(product)
         db.session.commit()
         return jsonify({'message': 'new product has been created'})
+
+
+@app.route('/productCategory/<category>', methods=['GET'])
+def get_product_by_category(category):
+    pass
 
 
 if __name__ == '__main__':
