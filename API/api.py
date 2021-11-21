@@ -209,7 +209,7 @@ def get_all_products():
 
     output = []
     for product in products:
-        product_data = {'public_id': product.title, 'content': product.content}
+        product_data = {'title': product.title, 'content': product.content}
         output.append(product_data)
 
     return jsonify({'product': output})
@@ -240,9 +240,24 @@ def new_product():
         return jsonify({'message': 'new product has been created'})
 
 
-@app.route('/productCategory/<category>', methods=['GET'])
+@app.route('/productCategory/<int:category>', methods=['GET'])
 def get_product_by_category(category):
-    pass
+    q = db.session.query(Product.title,
+                         Product.content,
+                         Product.price,
+                         Category.name
+                         ).join(Category, Product.product_category_id == Category.id).filter(Category.id == category).all()
+    output = []
+    for product in q:
+        user_data = {
+            'title': product.title,
+            'content': product.content,
+            'price': product.price,
+            'category': product.name
+        }
+
+        output.append(user_data)
+    return jsonify({'products': output})
 
 
 if __name__ == '__main__':
