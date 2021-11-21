@@ -176,9 +176,22 @@ def delete_user(public_id):
 
 
 # edit user info
-@app.route('/user', methods=['PUT'])
-def edit_user():
+@app.route('/user/<string:public_id>', methods=['PUT'])
+def edit_user(public_id):
     pass
+
+
+@app.route('/deleteProduct/<int:id>', methods=['DELETE'])
+def delete_Product(id):
+    product = Product.query.filter_by(id=id).first()
+
+    if not product:
+        return jsonify({'message': 'No product found!'})
+
+    db.session.delete(product)
+    db.session.commit()
+
+    return jsonify({'message': 'product has been deleted'})
 
 
 @app.route('/login')
@@ -213,11 +226,6 @@ def get_all_products():
         output.append(product_data)
 
     return jsonify({'product': output})
-
-
-@app.route('/')
-def hello():
-    return jsonify({'hello': 'world'})
 
 
 # need to fix this after we have auth function
@@ -258,6 +266,11 @@ def get_product_by_category(category):
 
         output.append(user_data)
     return jsonify({'products': output})
+
+
+@app.route('/')
+def hello():
+    return jsonify({'hello': 'world'})
 
 
 if __name__ == '__main__':
