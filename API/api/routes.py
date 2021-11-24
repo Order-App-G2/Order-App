@@ -4,72 +4,36 @@ import uuid
 from werkzeug.security import generate_password_hash, check_password_hash
 import jwt
 import datetime
-from flask_migrate import Migrate
-
-app = Flask(__name__)
-app.config['SECRET_KEY'] = '0fed4204af728cc75af855673b710ce4'
-
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///orders.db' //for testing
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:2865428@localhost/Orders'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-db = SQLAlchemy(app)
-migrate = Migrate(app, db)
+from api import app
+from api.models import *
 
 
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    public_id = db.Column(db.String(255), unique=True)
-    email = db.Column(db.String(255), unique=True)
-    username = db.Column(db.String(255), unique=True)
-    password = db.Column(db.String(255), nullable=False)
-    products = db.relationship('Product', backref='owner', lazy=True)
-
-    user_role_id = db.Column(db.Integer, db.ForeignKey('roles.id'), nullable=False)
-
-    def __init__(self, public_id, email, username, password, user_role_id):
-        self.public_id = public_id
-        self.email = email
-        self.username = username
-        self.password = password
-        self.user_role_id = user_role_id
+@app.route('/')
+def hello():
+    return jsonify({'hello': 'world'})
 
 
-class Roles(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    role = db.Column(db.String, unique=True, nullable=False)
+@app.route('/login')
+def login():
+    auth = request.authorization
 
-    user_role = db.relationship('User', backref='role', lazy=True)
+    if not auth or not auth.username or not auth.password:
+        return make_response('Not verified', 401, {'WWW-Authenticate': ' Basic realm="Login required!" '})
 
-    def __init__(self, role):
-        self.role = role
+    user = User.query.filter_by(username=auth.username).first()
 
+    if not user:
+        return make_response('Not verified', 401, {'WWW-Authenticate': ' Basic realm="Login required!" '})
 
-class Product(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(255), nullable=False)
-    content = db.Column(db.Text, nullable=False)
-    price = db.Column(db.Integer, nullable=False)
+    if check_password_hash(user.password, auth.password):
+        exp = datetime.datetime.utcnow() + datetime.timedelta(minutes=10)
+        token = jwt.encode({'public_id': user.public_id, 'exp': exp}, app.config['SECRET_KEY'], algorithm="HS256")
 
-    user_id = db.Column(db.String(255), db.ForeignKey('user.public_id'), nullable=False)
-    product_category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
+        return jsonify({'token': token})
 
-    def __init__(self, title, content, price, user_id, product_category_id):
-        self.title = title
-        self.content = content
-        self.price = price
-        self.user_id = user_id
-        self.product_category_id = product_category_id
+    return make_response('Not verified', 401, {'WWW-Authenticate': ' Basic realm="Login required!" '})
 
 
-class Category(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(255), nullable=False)
-
-    category_product = db.relationship('Product', backref='role', lazy=True)
-
-
-# routes
 # create non admin user
 @app.route('/createUser', methods=['POST'])
 def create_user():
@@ -194,27 +158,6 @@ def delete_Product(id):
     return jsonify({'message': 'product has been deleted'})
 
 
-@app.route('/login')
-def login():
-    auth = request.authorization
-
-    if not auth or not auth.username or not auth.password:
-        return make_response('Not verified', 401, {'WWW-Authenticate': ' Basic realm="Login required!" '})
-
-    user = User.query.filter_by(username=auth.username).first()
-
-    if not user:
-        return make_response('Not verified', 401, {'WWW-Authenticate': ' Basic realm="Login required!" '})
-
-    if check_password_hash(user.password, auth.password):
-        exp = datetime.datetime.utcnow() + datetime.timedelta(minutes=10)
-        token = jwt.encode({'public_id': user.public_id, 'exp': exp}, app.config['SECRET_KEY'], algorithm="HS256")
-
-        return jsonify({'token': token})
-
-    return make_response('Not verified', 401, {'WWW-Authenticate': ' Basic realm="Login required!" '})
-
-
 # gets all product(non auth needed)
 @app.route('/home', methods=['GET'])
 def get_all_products():
@@ -268,10 +211,31 @@ def get_product_by_category(category):
     return jsonify({'products': output})
 
 
-@app.route('/')
-def hello():
-    return jsonify({'hello': 'world'})
+@app.route('/ownerProducts/<string:public_id>', methods=['GET'])
+def get_all_product_by_owner(public_id):
+    user = db.session.query(Roles.role).join(User, Roles.id == User.user_role_id).filter(User.public_id == public_id).first()
 
+    if user.role == 'admin':
+        q = db.session.query(
+                             User.username,
+                             Product.title,
+                             Product.content,
+                             Product.price,
+                             ).join(User, Product.user_id == User.public_id).filter(
+            Product.user_id == public_id).all()
 
-if __name__ == '__main__':
-    app.run(debug=True)
+        if not q:
+            return jsonify({'message': 'no user found '})
+        output = []
+
+        for product in q:
+            user_data = {
+                'title': product.title,
+                'content': product.content,
+                'price': product.price,
+            }
+
+            output.append(user_data)
+        return jsonify({'product': output})
+    else:
+        return jsonify({'message': 'this user is a customer'})
