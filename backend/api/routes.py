@@ -1,11 +1,11 @@
-from flask import Flask, request, jsonify, make_response
-from flask_sqlalchemy import SQLAlchemy
+
 import uuid
-from werkzeug.security import generate_password_hash, check_password_hash
+
 import jwt
-import datetime
 from api import app
 from api.models import *
+from flask import request, jsonify, make_response
+from werkzeug.security import generate_password_hash, check_password_hash
 
 
 @app.route('/')
