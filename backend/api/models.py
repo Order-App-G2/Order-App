@@ -44,7 +44,7 @@ class Courier(db.Model):
     password = db.Column(db.String(255), nullable=False)
     available = db.Column(db.Boolean, default=True)
 
-    products = db.relationship('Order', backref='owner', lazy=True)
+    order_num = db.relationship('Order', backref='owner', lazy=True)
 
     def __init__(self, public_id, email, username, password, available):
         self.public_id = public_id
@@ -62,13 +62,12 @@ class Product(db.Model):
 
     partner_id = db.Column(db.String(255), db.ForeignKey('partner.public_id'), nullable=False)
     product_category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
-    courier = db.Column(db.Integer, db.ForeignKey('courier.id'), nullable=False)
 
     def __init__(self, title, content, price, user_id, product_category_id):
         self.title = title
         self.content = content
         self.price = price
-        self.user_id = user_id
+        self.partner_id = user_id
         self.product_category_id = product_category_id
 
 
@@ -85,6 +84,7 @@ class Order(db.Model):
 
     Order_status = db.Column(db.Integer, db.ForeignKey('status.id'), nullable=False, default=1)
     customer_id = db.Column(db.String(255), db.ForeignKey('customer.public_id'), nullable=False)
+    courier = db.Column(db.Integer, db.ForeignKey('courier.id'), nullable=False)
 
 
 class Status(db.Model):
