@@ -1,4 +1,3 @@
-
 import uuid
 
 import jwt
@@ -35,100 +34,99 @@ def login():
 
 
 # create non admin user
-@app.route('/createUser', methods=['POST'])
-def create_user():
+@app.route('/createCustomer', methods=['POST'])
+def create_customer():
     data = request.get_json()
     hashed_password = generate_password_hash(data['password'], method='sha256')
     username = data['username']
     password = data['password']
     email = data['email']
+    phoneNumber = data['phone_number']
+    address = data['address']
 
-    new_user = User(public_id=str(uuid.uuid4()),
-                    email=email,
-                    username=username,
-                    password=hashed_password,
-                    user_role_id=1)
-
+    new_customer = Customer(public_id=str(uuid.uuid4()), email=email, username=username, password=hashed_password,
+                            phoneNumber=phoneNumber, address=address)
     if not username or not password:
         return jsonify({"message": "parameter must be filled"}), 400
-    if User.query.filter_by(username=username).first():
+    if Customer.query.filter_by(username=username).first() or Partner.query.filter_by(
+            username=username).first() or Courier.query.filter_by(username=username).first():
         return jsonify({'message': 'username is already taken '}), 400
-    if User.query.filter_by(email=email).first():
+    if Customer.query.filter_by(email=email).first() or Partner.query.filter_by(
+            email=email).first() or Courier.query.filter_by(email=email).first():
         return jsonify({'message': 'email is already taken '}), 400
     else:
-        db.session.add(new_user)
+        db.session.add(new_customer)
         db.session.commit()
 
-    return jsonify({'message': 'new user has been created'})
+    return jsonify({'message': 'new customer has been created'})
 
 
 # create admin account
-@app.route('/createAdmin', methods=['POST'])
-def create_admin():
+@app.route('/createPartner', methods=['POST'])
+def create_partner():
     data = request.get_json()
     hashed_password = generate_password_hash(data['password'], method='sha256')
     username = data['username']
     password = data['password']
     email = data['email']
 
-    new_user = User(public_id=str(uuid.uuid4()), email=email, username=username, password=hashed_password,
-                    user_role_id=2)
+    new_user = Partner(public_id=str(uuid.uuid4()),
+                       email=email, username=username, password=hashed_password)
+
     if not username or not password:
         return jsonify({"message": "parameter must be filled"}), 400
-    if User.query.filter_by(username=username).first():
+    if Customer.query.filter_by(username=username).first() or Partner.query.filter_by(
+            username=username).first() or Courier.query.filter_by(username=username).first():
         return jsonify({'message': 'username is already taken '}), 400
-    if User.query.filter_by(email=email).first():
+    if Customer.query.filter_by(email=email).first() or Partner.query.filter_by(
+            email=email).first() or Courier.query.filter_by(email=email).first():
         return jsonify({'message': 'email is already taken '}), 400
     else:
         db.session.add(new_user)
         db.session.commit()
 
-    return jsonify({'message': 'new admin has been created'})
+    return jsonify({'message': 'new partner has been created'})
 
 
 # get all users and their role
-@app.route('/user', methods=['GET'])
+@app.route('/customer', methods=['GET'])
 def get_all_users():
-    q = db.session.query(User.username,
-                         User.email,
-                         Roles.role,
-                         User.public_id
-                         ).join(Roles, User.user_role_id == Roles.id).all()
+    q = db.session.query(Customer).all()
+
     output = []
-    for user in q:
+    for customer in q:
         user_data = {
-            'username': user.username,
-            'email': user.email,
-            'public_id': user.public_id,
-            'role': user.role
+            'username': customer.username,
+            'email': customer.email,
+            'public_id': customer.public_id,
+            'address': customer.address,
+            'phone Number': customer.phoneNumber
         }
 
         output.append(user_data)
     return jsonify({'users': output})
 
 
-@app.route('/user/<public_id>', methods=['GET'])
+@app.route('/customer/<public_id>', methods=['GET'])
 def get_one_user(public_id):
-    q = db.session.query(User.username,
-                         User.email,
-                         User.public_id,
-                         Roles.role,
-                         ).join(Roles, User.user_role_id == Roles.id). \
-        filter(User.public_id == public_id).first()
+    q = db.session.query(Customer.username,
+                         Customer.email,
+                         Customer.public_id,
+                         Customer.phoneNumber).filter(Customer.public_id == public_id).first()
 
     if not q:
         return jsonify({'message': 'no user found '})
 
     user_data = {'public_id': q.public_id,
                  'name': q.username,
-                 'role': q.role}
+                 'phone number': q.phoneNumber}
     return jsonify({'user': user_data})
 
 
 # delete user
-@app.route('/user/<public_id>', methods=['DELETE'])
+@app.route('/customer/<public_id>', methods=['DELETE'])
 def delete_user(public_id):
-    user = User.query.filter_by(public_id=public_id).first()
+    user = Customer.query.filter_by(public_id=public_id).first()
 
     if not user:
         return jsonify({'message': 'No user found!'})
@@ -197,7 +195,8 @@ def get_product_by_category(category):
                          Product.content,
                          Product.price,
                          Category.name
-                         ).join(Category, Product.product_category_id == Category.id).filter(Category.id == category).all()
+                         ).join(Category, Product.product_category_id == Category.id).filter(
+        Category.id == category).all()
     output = []
     for product in q:
         user_data = {
@@ -213,29 +212,25 @@ def get_product_by_category(category):
 
 @app.route('/ownerProducts/<string:public_id>', methods=['GET'])
 def get_all_product_by_owner(public_id):
-    user = db.session.query(Roles.role).join(User, Roles.id == User.user_role_id).filter(User.public_id == public_id).first()
 
-    if user.role == 'admin':
-        q = db.session.query(
-                             User.username,
-                             Product.title,
-                             Product.content,
-                             Product.price,
-                             ).join(User, Product.user_id == User.public_id).filter(
-            Product.user_id == public_id).all()
+    q = db.session.query(
+        Partner.username,
+        Product.title,
+        Product.content,
+        Product.price,
+        ).join(Partner, Product.partner_id == Partner.public_id).filter(
+            Product.partner_id == public_id).all()
 
-        if not q:
-            return jsonify({'message': 'no user found '})
-        output = []
+    if not q:
+        return jsonify({'message': 'no user found '})
+    output = []
 
-        for product in q:
-            user_data = {
-                'title': product.title,
-                'content': product.content,
-                'price': product.price,
-            }
+    for product in q:
+        user_data = {
+            'title': product.title,
+            'content': product.content,
+            'price': product.price,
+        }
 
-            output.append(user_data)
-        return jsonify({'product': output})
-    else:
-        return jsonify({'message': 'this user is a customer'})
+        output.append(user_data)
+    return jsonify({'product': output})
