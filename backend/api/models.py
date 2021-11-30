@@ -5,11 +5,13 @@ from datetime import datetime
 class Customer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     public_id = db.Column(db.String(255), unique=True)
-    email = db.Column(db.String(255), unique=True)
-    username = db.Column(db.String(255), unique=True)
+    email = db.Column(db.String(255), unique=True, nullable=False)
+    username = db.Column(db.String(255), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
     address = db.Column(db.String(255), nullable=False)
     phoneNumber = db.Column(db.String(255), nullable=False)
+
+    order_id = db.relationship('Order', backref='order_customer', lazy=True)
 
     def __init__(self, public_id, email, username, password, address, phoneNumber):
         self.public_id = public_id
@@ -62,6 +64,7 @@ class Product(db.Model):
 
     partner_id = db.Column(db.String(255), db.ForeignKey('partner.public_id'), nullable=False)
     product_category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
+    product_order_item = db.relationship('order_product', backref='order')
 
     def __init__(self, title, content, price, user_id, product_category_id):
         self.title = title
@@ -75,16 +78,38 @@ class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), nullable=False)
 
-    category_product = db.relationship('Product', backref='role', lazy=True)
+    category_product = db.relationship('Product', backref='category', lazy=True)
 
 
 class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     order_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-
     Order_status = db.Column(db.Integer, db.ForeignKey('status.id'), nullable=False, default=1)
+    Partner_id = db.Column(db.Integer, db.ForeignKey('partner.id'), nullable=False, default=1)
     customer_id = db.Column(db.String(255), db.ForeignKey('customer.public_id'), nullable=False)
     courier = db.Column(db.Integer, db.ForeignKey('courier.id'), nullable=False)
+
+    order_products_item = db.relationship('order_product', backref='order')
+
+    def __init__(self, partner_id, customer_id, courier):
+        self.Partner_id = partner_id
+        self.customer_id = customer_id
+        self.courier = courier
+
+
+class Order_products(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    product_id = db.Column(db.Integer, db.ForeignKey('Product.id'))
+    order_id = db.Column(db.Integer, db.ForeignKey('Order.id'))
+    quantity = db.Column(db.Integer)
+
+    item = db.relationship('product')
+    order = db.relationship('order')
+
+    def __init__(self, product_id,order_id, quantity):
+        self.product_id = product_id
+        self.order_id = order_id
+        self.quantity = quantity
 
 
 class Status(db.Model):
