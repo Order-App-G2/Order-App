@@ -88,6 +88,31 @@ def create_partner():
     return jsonify({'message': 'new partner has been created'})
 
 
+# create courier account
+@app.route('/createCourier', methods=['POST'])
+def create_courier():
+    data = request.get_json()
+    hashed_password = generate_password_hash(data['password'], method='sha256')
+    username = data['username']
+    password = data['password']
+    email = data['email']
+
+    new_courier = Courier(public_id=str(uuid.uuid4()), email=email, username=username, password=hashed_password)
+
+    if not username or not password:
+        return jsonify({"message": "parameter must be filled"}), 400
+    if Customer.query.filter_by(username=username).first() or Partner.query.filter_by(
+            username=username).first() or Courier.query.filter_by(username=username).first():
+        return jsonify({'message': 'username is already taken '}), 400
+    if Customer.query.filter_by(email=email).first() or Partner.query.filter_by(
+            email=email).first() or Courier.query.filter_by(email=email).first():
+        return jsonify({'message': 'email is already taken '}), 400
+    else:
+        db.session.add(new_courier)
+        db.session.commit()
+
+    return jsonify({'message': 'new courier has been created'})
+
 # get all users and their role
 @app.route('/customer', methods=['GET'])
 def get_all_users():
@@ -105,6 +130,37 @@ def get_all_users():
 
         output.append(user_data)
     return jsonify({'users': output})
+
+
+@app.route('/getCourier', methods=['GET'])
+def get_all_available_couriers():
+    q = db.session.query(Courier).filter(Courier.available).all()
+
+    output = []
+    for courier in q:
+        user_data = {
+            'username': courier.username,
+            'email': courier.email,
+            'public_id': courier.public_id,
+            'available': courier.available
+        }
+
+        output.append(user_data)
+    return jsonify({'users': output})
+
+
+@app.route('/changeCourier/<public_id>', methods=['PUT'])
+def change_availability(public_id):
+    courier = db.session.query(Courier).filter(public_id == public_id).first()
+
+    if courier.available:
+        courier.available = False
+
+    else:
+        courier.available = True
+
+    db.session.commit()
+    return jsonify({'courier': courier.available})
 
 
 @app.route('/customer/<public_id>', methods=['GET'])
@@ -140,9 +196,43 @@ def delete_user(public_id):
 # edit user info
 @app.route('/user/<string:public_id>', methods=['PUT'])
 def edit_user(public_id):
+    user = Customer.query.filter_by(public_id=public_id).first()
+
+    if not user:
+        return jsonify({'message': 'No user found!'})
+
+    user.username = input()
+    user.email = input()
+    user.phoneNumber = input()
+    user.address = input()
+
+    db.session.commit()
+
+    return jsonify({'message': 'user has been edited'})
     pass
 
 
+# edit product info
+@app.route('/product/<string:public_id>', methods=['PUT'])
+def edit_product(public_id):
+    partner = Partner.query.filter_by(public_id=public_id).first()
+    product = Product.query.filter_by(db.ForeignKey).first()
+
+    if product.partner_id != partner.id:
+        return jsonify({'message': 'No product found!'})
+
+    else:
+        product.title = input()
+        product.content = input()
+        product.price = input()
+        product.product_category_id = input()
+
+    db.session.commit()
+
+    return jsonify({'message': 'product has been edited'})
+    pass
+
+#
 @app.route('/deleteProduct/<int:id>', methods=['DELETE'])
 def delete_Product(id):
     product = Product.query.filter_by(id=id).first()
