@@ -46,12 +46,12 @@ class Courier(db.Model):
 
     order_num = db.relationship('Order', backref='owner', lazy=True)
 
-    def __init__(self, public_id, email, username, password, available):
+    def __init__(self, public_id, email, username, password):
         self.public_id = public_id
         self.email = email
         self.username = username
         self.password = password
-        self.available = available
+
 
 
 class Product(db.Model):
@@ -92,6 +92,3 @@ class Status(db.Model):
     order_status = db.Column(db.String(255), nullable=False)
 
     status_order = db.relationship('Order', backref='order', lazy=True)
-
-
-
