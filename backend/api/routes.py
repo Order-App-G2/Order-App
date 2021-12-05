@@ -1,10 +1,33 @@
 import uuid
-
+from datetime import datetime, timedelta
 import jwt
 from api import app
 from api.models import *
 from flask import request, jsonify, make_response
 from werkzeug.security import generate_password_hash, check_password_hash
+from functools import wraps
+
+
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = None
+        if 'token' in request.headers:
+            token = request.headers['token']
+
+        if not token:
+            return jsonify({'message': 'Token is missing'}), 403
+
+        try:
+            data = jwt.decode(token, app.config['SECRET_KEY'], algorithms='HS256')
+            current_user = Customer.query.filter_by(public_id=data['public_id']).first()
+
+        except:
+            return jsonify({'message': 'Token is invalid'}), 401
+
+        return f(current_user, *args, **kwargs)
+
+    return decorated
 
 
 @app.route('/')
@@ -19,14 +42,15 @@ def login():
     if not auth or not auth.username or not auth.password:
         return make_response('Not verified', 401, {'WWW-Authenticate': ' Basic realm="Login required!" '})
 
-    user = User.query.filter_by(username=auth.username).first()
+    user = Customer.query.filter_by(username=auth.username).first() or Partner.query.filter_by(
+        username=auth.username).first() or Courier.query.filter_by(username=auth.username).first()
 
     if not user:
         return make_response('Not verified', 401, {'WWW-Authenticate': ' Basic realm="Login required!" '})
 
     if check_password_hash(user.password, auth.password):
-        exp = datetime.datetime.utcnow() + datetime.timedelta(minutes=10)
-        token = jwt.encode({'public_id': user.public_id, 'exp': exp}, app.config['SECRET_KEY'], algorithm="HS256")
+        exp = datetime.utcnow() + timedelta(minutes=10)
+        token = jwt.encode({'id': user.public_id, 'exp': exp}, app.config['SECRET_KEY'], algorithm="HS256")
 
         return jsonify({'token': token})
 
@@ -113,9 +137,13 @@ def create_courier():
 
     return jsonify({'message': 'new courier has been created'})
 
+
 # get all users and their role
 @app.route('/customer', methods=['GET'])
-def get_all_users():
+@token_required
+def get_all_users(current_user):
+    if not current_user.Customer:
+        return jsonify({'message':'Cannot perform that function '})
     q = db.session.query(Customer).all()
 
     output = []
@@ -194,45 +222,45 @@ def delete_user(public_id):
 
 
 # edit user info
-@app.route('/user/<string:public_id>', methods=['PUT'])
-def edit_user(public_id):
-    user = Customer.query.filter_by(public_id=public_id).first()
-
-    if not user:
-        return jsonify({'message': 'No user found!'})
-
-    user.username = input()
-    user.email = input()
-    user.phoneNumber = input()
-    user.address = input()
-
-    db.session.commit()
-
-    return jsonify({'message': 'user has been edited'})
-    pass
+# @app.route('/user/<string:public_id>', methods=['PUT'])
+# def edit_user(public_id):
+#     user = Customer.query.filter_by(public_id=public_id).first()
+#
+#     if not user:
+#         return jsonify({'message': 'No user found!'})
+#
+#     user.username = input()
+#     user.email = input()
+#     user.phoneNumber = input()
+#     user.address = input()
+#
+#     db.session.commit()
+#
+#     return jsonify({'message': 'user has been edited'})
+#     pass
 
 
 # edit product info
-@app.route('/product/<string:public_id>', methods=['PUT'])
-def edit_product(public_id):
-    partner = Partner.query.filter_by(public_id=public_id).first()
-    product = Product.query.filter_by(db.ForeignKey).first()
-
-    if product.partner_id != partner.id:
-        return jsonify({'message': 'No product found!'})
-
-    else:
-        product.title = input()
-        product.content = input()
-        product.price = input()
-        product.product_category_id = input()
-
-    db.session.commit()
-
-    return jsonify({'message': 'product has been edited'})
-    pass
-
+# @app.route('/product/<string:public_id>', methods=['PUT'])
+# def edit_product(public_id):
+#     partner = Partner.query.filter_by(public_id=public_id).first()
+#     product = Product.query.filter_by(db.ForeignKey).first()
 #
+#     if product.partner_id != partner.id:
+#         return jsonify({'message': 'No product found!'})
+#
+#     else:
+#         product.title = input()
+#         product.content = input()
+#         product.price = input()
+#         product.product_category_id = input()
+#
+#     db.session.commit()
+#
+#     return jsonify({'message': 'product has been edited'})
+#     pass
+
+
 @app.route('/deleteProduct/<int:id>', methods=['DELETE'])
 def delete_Product(id):
     product = Product.query.filter_by(id=id).first()
@@ -302,14 +330,13 @@ def get_product_by_category(category):
 
 @app.route('/ownerProducts/<string:public_id>', methods=['GET'])
 def get_all_product_by_owner(public_id):
-
     q = db.session.query(
         Partner.username,
         Product.title,
         Product.content,
         Product.price,
-        ).join(Partner, Product.partner_id == Partner.public_id).filter(
-            Product.partner_id == public_id).all()
+    ).join(Partner, Product.partner_id == Partner.public_id).filter(
+        Product.partner_id == public_id).all()
 
     if not q:
         return jsonify({'message': 'no user found '})
@@ -324,3 +351,39 @@ def get_all_product_by_owner(public_id):
 
         output.append(user_data)
     return jsonify({'product': output})
+
+
+@app.route('/makeOrder', methods=['POST'])
+def order_products():
+    """
+    The new body structure is as follows:
+    {
+        customer_id: <customer_id>,
+        partner_id: <partner_id>,
+        products: [
+            {
+                product_id: <product_id>,
+                quantity: <quantity>
+            },
+            {...}
+        ]
+    }
+    :return:
+    """
+    data = request.get_json()
+    customer_id = data['customer_id']
+    partner_id = data['partner_id']
+    new_order = Order(customer_id=customer_id, partner_id=partner_id)
+    db.session.add(new_order)
+    db.session.flush()
+
+    for entity in data['products']:
+        product_id = entity['product_id']
+        quantity = entity['quantity']
+        products = Order_products(product_id=product_id, order_id=new_order.id, quantity=quantity)
+        db.session.add(products)
+
+    db.session.commit()
+    return jsonify({'Order': new_order.id,
+                    'customer': customer_id,
+                    'partner id': partner_id})

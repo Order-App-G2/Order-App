@@ -55,7 +55,6 @@ class Courier(db.Model):
         self.password = password
 
 
-
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(255), nullable=False)
@@ -64,7 +63,7 @@ class Product(db.Model):
 
     partner_id = db.Column(db.String(255), db.ForeignKey('partner.public_id'), nullable=False)
     product_category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
-    product_order_item = db.relationship('order_product', backref='order')
+    product_order_item = db.relationship('Order_products', backref='items', lazy=True)
 
     def __init__(self, title, content, price, user_id, product_category_id):
         self.title = title
@@ -87,26 +86,25 @@ class Order(db.Model):
     Order_status = db.Column(db.Integer, db.ForeignKey('status.id'), nullable=False, default=1)
     Partner_id = db.Column(db.Integer, db.ForeignKey('partner.id'), nullable=False, default=1)
     customer_id = db.Column(db.String(255), db.ForeignKey('customer.public_id'), nullable=False)
-    courier = db.Column(db.Integer, db.ForeignKey('courier.id'), nullable=False)
+    courier = db.Column(db.Integer, db.ForeignKey('courier.id'))
 
-    order_products_item = db.relationship('order_product', backref='order')
+    order_products_item = db.relationship('Order_products', backref='orders', lazy=True)
 
-    def __init__(self, partner_id, customer_id, courier):
+    def __init__(self, partner_id, customer_id):
         self.Partner_id = partner_id
         self.customer_id = customer_id
-        self.courier = courier
 
 
 class Order_products(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    product_id = db.Column(db.Integer, db.ForeignKey('Product.id'))
-    order_id = db.Column(db.Integer, db.ForeignKey('Order.id'))
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id'))
+    order_id = db.Column(db.Integer, db.ForeignKey('order.id'))
     quantity = db.Column(db.Integer)
 
-    item = db.relationship('product')
-    order = db.relationship('order')
+    item = db.relationship('Product')
+    order = db.relationship('Order')
 
-    def __init__(self, product_id,order_id, quantity):
+    def __init__(self, product_id, order_id, quantity):
         self.product_id = product_id
         self.order_id = order_id
         self.quantity = quantity
