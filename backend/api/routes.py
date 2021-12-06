@@ -20,7 +20,8 @@ def token_required(f):
 
         try:
             data = jwt.decode(token, app.config['SECRET_KEY'], algorithms='HS256')
-            current_user = Customer.query.filter_by(public_id=data['public_id']).first()
+            current_user = Customer.query.filter_by(public_id=data['public_id']).first() or Courier.query.filter_by(
+                public_id=data['public_id']).first() or Partner.query.filter_by(public_id=data['public_id']).first()
 
         except:
             return jsonify({'message': 'Token is invalid'}), 401
@@ -35,7 +36,7 @@ def hello():
     return jsonify({'hello': 'world'})
 
 
-@app.route('/login')
+@app.route('/login', methods=['POST'])
 def login():
     auth = request.authorization
 
@@ -49,8 +50,8 @@ def login():
         return make_response('Not verified', 401, {'WWW-Authenticate': ' Basic realm="Login required!" '})
 
     if check_password_hash(user.password, auth.password):
-        exp = datetime.utcnow() + timedelta(minutes=10)
-        token = jwt.encode({'id': user.public_id, 'exp': exp}, app.config['SECRET_KEY'], algorithm="HS256")
+        exp = datetime.utcnow() + timedelta(minutes=30)
+        token = jwt.encode({'public_id': user.public_id, 'exp': exp}, app.config['SECRET_KEY'], algorithm="HS256")
 
         return jsonify({'token': token})
 
@@ -82,7 +83,9 @@ def create_customer():
         db.session.add(new_customer)
         db.session.commit()
 
-    return jsonify({'message': 'new customer has been created'})
+    return jsonify({'customer id': new_customer.public_id,
+                    'username': new_customer.username,
+                    'email': new_customer.email})
 
 
 # create admin account
@@ -140,10 +143,8 @@ def create_courier():
 
 # get all users and their role
 @app.route('/customer', methods=['GET'])
-@token_required
-def get_all_users(current_user):
-    if not current_user.Customer:
-        return jsonify({'message':'Cannot perform that function '})
+def get_all_users():
+
     q = db.session.query(Customer).all()
 
     output = []
@@ -161,7 +162,10 @@ def get_all_users(current_user):
 
 
 @app.route('/getCourier', methods=['GET'])
-def get_all_available_couriers():
+@token_required
+def get_all_available_couriers(current_user):
+    if current_user is Partner:
+        return jsonify({'message': 'Cannot perform that function '})
     q = db.session.query(Courier).filter(Courier.available).all()
 
     output = []
@@ -178,17 +182,21 @@ def get_all_available_couriers():
 
 
 @app.route('/changeCourier/<public_id>', methods=['PUT'])
-def change_availability(public_id):
-    courier = db.session.query(Courier).filter(public_id == public_id).first()
+@token_required
+def change_availability(current_user, public_id):
+    if current_user is Courier:
+        return jsonify({'message': 'Cannot perform that function '})
+    if current_user.public_id == public_id:
+        courier = db.session.query(Courier).filter(public_id == current_user.public_id).first()
 
-    if courier.available:
-        courier.available = False
+        if courier.available:
+            courier.available = False
 
-    else:
-        courier.available = True
+        else:
+            courier.available = True
 
-    db.session.commit()
-    return jsonify({'courier': courier.available})
+        db.session.commit()
+        return jsonify({'courier': courier.available})
 
 
 @app.route('/customer/<public_id>', methods=['GET'])
@@ -209,14 +217,16 @@ def get_one_user(public_id):
 
 # delete user
 @app.route('/customer/<public_id>', methods=['DELETE'])
-def delete_user(public_id):
-    user = Customer.query.filter_by(public_id=public_id).first()
+@token_required
+def delete_user(current_user, public_id):
+    if current_user.public_id == public_id:
+        user = Customer.query.filter_by(public_id=current_user.public_id).first()
 
-    if not user:
-        return jsonify({'message': 'No user found!'})
+        if not user:
+            return jsonify({'message': 'No user found!'})
 
-    db.session.delete(user)
-    db.session.commit()
+        db.session.delete(user)
+        db.session.commit()
 
     return jsonify({'message': 'user has been deleted'})
 
@@ -262,7 +272,7 @@ def delete_user(public_id):
 
 
 @app.route('/deleteProduct/<int:id>', methods=['DELETE'])
-def delete_Product(id):
+def delete_product(id):
     product = Product.query.filter_by(id=id).first()
 
     if not product:
@@ -290,21 +300,25 @@ def get_all_products():
 # need to fix this after we have auth function
 # add new product
 @app.route('/addProduct', methods=['POST'])
-def new_product():
+@token_required
+def new_product(current_user):
+    if current_user is Partner:
+        return jsonify({'message': 'Cannot perform that function '})
     data = request.get_json()
     title = data['title']
     content = data['content']
-    user_id = data['user_id']
     price = data['price']
     category = data['category']
 
-    if not title or not content or not user_id:
+    if not title or not content:
         return jsonify({'message': 'all parameters must be filled'})
     else:
-        product = Product(title=title, content=content, price=price, user_id=user_id, product_category_id=category)
+        product = Product(title=title, content=content, price=price, user_id=current_user.public_id, product_category_id=category)
         db.session.add(product)
         db.session.commit()
-        return jsonify({'message': 'new product has been created'})
+        return jsonify({'product': title,
+                        'content': content,
+                        'category': category})
 
 
 @app.route('/productCategory/<int:category>', methods=['GET'])
@@ -354,11 +368,11 @@ def get_all_product_by_owner(public_id):
 
 
 @app.route('/makeOrder', methods=['POST'])
-def order_products():
+@token_required
+def order_products(current_user):
     """
     The new body structure is as follows:
     {
-        customer_id: <customer_id>,
         partner_id: <partner_id>,
         products: [
             {
@@ -370,10 +384,11 @@ def order_products():
     }
     :return:
     """
+    if current_user is Customer:
+        return jsonify({'message': 'Cannot perform that function '})
     data = request.get_json()
-    customer_id = data['customer_id']
     partner_id = data['partner_id']
-    new_order = Order(customer_id=customer_id, partner_id=partner_id)
+    new_order = Order(customer_id=current_user.public_id, partner_id=partner_id)
     db.session.add(new_order)
     db.session.flush()
 
@@ -385,5 +400,5 @@ def order_products():
 
     db.session.commit()
     return jsonify({'Order': new_order.id,
-                    'customer': customer_id,
+                    'customer': current_user.public_id,
                     'partner id': partner_id})
