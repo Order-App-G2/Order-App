@@ -5,8 +5,19 @@ const API_URL = "http://localhost:5000/";
 
 class AuthService {
     login(username: any, password: any) {
+        const user = {
+            username,
+            password
+        }
+        const token = btoa(`${username}:${password}`)
+
+        const header = {
+            "Authorization": `Basic ${token}`,
+            "Content-Type": "application/json"
+        }
+
         return axios
-            .post(API_URL + '/login', { username, password })
+            .post(API_URL + 'login', user , {headers: header})
             .then((response) => {
                 if (response.data.accsessToken) {
                     localStorage.setItem("user", JSON.stringify(response.data));
