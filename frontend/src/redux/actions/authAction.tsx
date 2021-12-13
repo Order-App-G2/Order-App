@@ -157,5 +157,3 @@ export const logout = () => (dispatch: any) => {
         type: LOGOUT,
     });
 };
-
-export const 
