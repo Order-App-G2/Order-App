@@ -1,9 +1,9 @@
 import React, { Component } from 'react'
 import './SignIn.css'
-import { Link } from 'react-router-dom';
+import { Link, Navigate , NavLink} from 'react-router-dom';
+// import { Navigate } from 'react-router-dom';
 import { connect } from "react-redux";
 import { login } from '../../redux/actions/authAction';
-
 
 interface SignInProps {
     login: (username: any, password: any) => any,
@@ -15,7 +15,7 @@ interface SignInState {
     isLoading: boolean,
     error: boolean,
     success: boolean,
-    userName: string, 
+    userName: string,
     password: string
 }
 
@@ -53,15 +53,14 @@ export class SignIn extends Component<SignInProps, SignInState> {
             password: '',
         }
     }
-
-
     submitHandler = (event: any) => {
+
         event.preventDefault();
 
         this.setState({
             success: false,
         });
-        
+
         this.props.login(this.state.userName, this.state.password)
             .then(() => {
                 this.setState({
@@ -73,28 +72,24 @@ export class SignIn extends Component<SignInProps, SignInState> {
                     success: false,
                 });
             });
-        
-
 
     };
 
     returnFormLogIn = () => {
         return (<div>
-             <FormHeader title="Log in to your account" />
-            <FormInput description="Username" placeholder="Enter your username" type="text"onChange={(e: any) => { this.setState({ userName: e.target.value }) }} />
+            <FormHeader title="Log in to your account" />
+            <FormInput description="Username" placeholder="Enter your username" type="text" onChange={(e: any) => { this.setState({ userName: e.target.value }) }} />
             <FormInput description="Password" placeholder="Enter your password" type="password" onChange={(e: any) => { this.setState({ password: e.target.value }) }} />
             <FormButton title="Log in" onClick={this.submitHandler} />
-            <p>Need an account? <Link to={{ pathname: 'signUp' }} className='signUp'>Sign up</Link></p>
+            <p className='redirectToSignUp'>Need an account ? <Link to='signUp' className='signUp'> Sign up</Link></p>
         </div>)
     }
-
-    
 
     render() {
         return (
             <div id="SignInForm">
                 {!this.props.isLogedIn && this.returnFormLogIn()}
-                {this.props.isLogedIn &&  <FormHeader title="You are already loged In" />}
+                {this.props.isLogedIn && <FormHeader title="You are already loged In" />}
             </div>
 
         )
@@ -102,7 +97,7 @@ export class SignIn extends Component<SignInProps, SignInState> {
 }
 function mapStateToProps(state: any) {
     return {
-        isLogedIn: state.authReducer.isLoggedIn 
+        isLogedIn: state.authReducer.isLoggedIn
     };
 }
 

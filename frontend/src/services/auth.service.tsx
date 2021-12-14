@@ -1,6 +1,13 @@
 import { AsyncLocalStorage } from "async_hooks";
 import axios from "axios";
+import jwt from 'jwt-decode';
+
 const API_URL = "http://localhost:5000/";
+
+interface User {
+    public_id: any, 
+    exp: any
+}
 
 
 class AuthService {
@@ -19,8 +26,14 @@ class AuthService {
         return axios
             .post(API_URL + 'login', user , {headers: header})
             .then((response) => {
-                if (response.data.accsessToken) {
+                if (response.data.token) {
                     localStorage.setItem("user", JSON.stringify(response.data));
+                    const user: User= jwt(response.data.token)
+                    console.log(user)
+                    return  axios.get(API_URL + `customer/${user.public_id}`)
+                                .then((res)=>{
+                                    console.log(res)
+                                })
                 }
 
                 return response.data;
