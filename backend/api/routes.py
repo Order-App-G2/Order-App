@@ -276,20 +276,19 @@ def change_availability(current_user):
                     'available': courier.available})
 
 
-@app.route('/customer/<public_id>', methods=['GET'])
-def get_one_user(public_id):
-    q = db.session.query(Customer.username,
-                         Customer.email,
-                         Customer.public_id,
-                         Customer.phoneNumber).filter(Customer.public_id == public_id).first()
+@app.route('/userRole', methods=['GET'])
+@token_required
+def get_one_user(current_user):
+    if type(current_user) == Customer:
 
-    if not q:
-        return jsonify({'message': 'no user found '}), 404
+        return jsonify({'user type': 'customer'})
 
-    user_data = {'public_id': q.public_id,
-                 'name': q.username,
-                 'phone number': q.phoneNumber}
-    return jsonify({'user': user_data})
+    if type(current_user) == Courier:
+
+        return jsonify({'user type': 'courier'})
+    if type(current_user) == Partner:
+
+        return jsonify({'user type': 'partner'})
 
 
 # delete user
