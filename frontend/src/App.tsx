@@ -11,6 +11,7 @@ import Layout from './app/Layout/Layout';
 import { Navigate } from 'react-router-dom';
 import Mealsdetails from './app/Meals/Mealsdetails';
 import ProductsPage from './app/Screens/ProductsPage';
+import Search from './app/Screens/Search';
 
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
         <Route path="/product" element={<ProductsPage />} >
         <Route path="/products/:productId" element={<Mealsdetails />} />
         </Route>
+        <Route path="/Search"  element={<Search/>}/>
       </Routes>
     </Layout>
   );

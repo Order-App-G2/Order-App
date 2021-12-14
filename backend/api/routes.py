@@ -58,9 +58,25 @@ def login():
     return make_response('Not verified', 401, {'WWW-Authenticate': ' Basic realm="Login required!" '})
 
 
-# create non admin user
+# create customer user
 @app.route('/createCustomer', methods=['POST'])
 def create_customer():
+    """
+       The body structure is as follows:
+       {
+           username: <username:string>,
+           password: <password:string>,
+           email: <email:string>,
+           phoneNumber: <phone_number:string>,
+           address: <address:string>,
+
+
+       }
+       :return:
+       'customer id': new_customer.public_id,
+                    'username': new_customer.username,
+                    'email': new_customer.email
+       """
     data = request.get_json()
     hashed_password = generate_password_hash(data['password'], method='sha256')
     username = data['username']
@@ -88,9 +104,23 @@ def create_customer():
                     'email': new_customer.email})
 
 
-# create admin account
+# create shop account
 @app.route('/createPartner', methods=['POST'])
 def create_partner():
+    """
+           The body structure is as follows:
+           {
+               username: <username:string>,
+               password: <password:string>,
+               email: <email:string>,
+
+
+           }
+           :return:
+           'partner id': new_user.public_id,
+                        'username': new_user.username,
+                        'email': new_user.email
+           """
     data = request.get_json()
     hashed_password = generate_password_hash(data['password'], method='sha256')
     username = data['username']
@@ -112,12 +142,29 @@ def create_partner():
         db.session.add(new_user)
         db.session.commit()
 
-    return jsonify({'message': 'new partner has been created'})
+    return jsonify({'public_id': new_user.public_id,
+                    'partner id': new_user.username,
+                    'email': new_user.email
+                    })
 
 
 # create courier account
 @app.route('/createCourier', methods=['POST'])
 def create_courier():
+    """
+               The body structure is as follows:
+               {
+                   username: <username:string>,
+                   password: <password:string>,
+                   email: <email:string>,
+
+
+               }
+               :return:
+               'courier id': new_courier.public_id,
+                            'username': new_courier.username,
+                            'email': new_courier.email
+               """
     data = request.get_json()
     hashed_password = generate_password_hash(data['password'], method='sha256')
     username = data['username']
@@ -138,13 +185,23 @@ def create_courier():
         db.session.add(new_courier)
         db.session.commit()
 
-    return jsonify({'message': 'new courier has been created'})
+    return jsonify({'courier id': new_courier.public_id,
+                    'username': new_courier.username,
+                    'email': new_courier.email})
 
 
 # get all users and their role
 @app.route('/customer', methods=['GET'])
 def get_all_users():
+    """
 
+                   :return:
+                    'customer id': customer.public_id,
+                    'email': customer.email,
+                    'username': customer.username,
+                    'address': customer.address,
+                    'email': customer.phoneNumber
+                   """
     q = db.session.query(Customer).all()
 
     output = []
@@ -164,8 +221,16 @@ def get_all_users():
 @app.route('/getCourier', methods=['GET'])
 @token_required
 def get_all_available_couriers(current_user):
-    if current_user is Partner:
-        return jsonify({'message': 'Cannot perform that function '})
+    """
+                       :return:
+                        'email': courier.email,
+                        'username': courier.username,
+                        'courier id': courier.public_id,
+                        'available': courier.available
+                       """
+    if type(current_user) != Partner:
+        return jsonify({'message': 'Cannot perform that function '}), 403
+
     q = db.session.query(Courier).filter(Courier.available).all()
 
     output = []
@@ -173,115 +238,254 @@ def get_all_available_couriers(current_user):
         user_data = {
             'username': courier.username,
             'email': courier.email,
-            'public_id': courier.public_id,
+            'courier ': courier.public_id,
             'available': courier.available
         }
 
         output.append(user_data)
-    return jsonify({'users': output})
+    return jsonify({'couriers': output})
 
 
-@app.route('/changeCourier/<public_id>', methods=['PUT'])
+@app.route('/changeCourier', methods=['PUT'])
 @token_required
-def change_availability(current_user, public_id):
-    if current_user is Courier:
-        return jsonify({'message': 'Cannot perform that function '})
-    if current_user.public_id == public_id:
-        courier = db.session.query(Courier).filter(public_id == current_user.public_id).first()
+def change_availability(current_user):
+    """
+                  The body structure is as follows:
 
-        if courier.available:
-            courier.available = False
-
-        else:
-            courier.available = True
-
-        db.session.commit()
-        return jsonify({'courier': courier.available})
+                    required login
 
 
-@app.route('/customer/<public_id>', methods=['GET'])
-def get_one_user(public_id):
-    q = db.session.query(Customer.username,
-                         Customer.email,
-                         Customer.public_id,
-                         Customer.phoneNumber).filter(Customer.public_id == public_id).first()
 
-    if not q:
-        return jsonify({'message': 'no user found '})
+                  :return:
+                  'courier': courier.username,
+                               'available': new_courier.available
+                  """
+    if type(current_user) != Courier:
+        return jsonify({'message': 'Cannot perform that function '}), 403
 
-    user_data = {'public_id': q.public_id,
-                 'name': q.username,
-                 'phone number': q.phoneNumber}
-    return jsonify({'user': user_data})
+    courier = db.session.query(Courier).filter(Courier.public_id == current_user.public_id).first()
+
+    if courier.available:
+        courier.available = False
+
+    else:
+        courier.available = True
+
+    db.session.commit()
+    return jsonify({'courier': courier.username,
+                    'available': courier.available})
+
+
+@app.route('/userRole', methods=['GET'])
+@token_required
+def get_one_user(current_user):
+    if type(current_user) == Customer:
+
+        return jsonify({'user type': 'customer'})
+
+    if type(current_user) == Courier:
+
+        return jsonify({'user type': 'courier'})
+    if type(current_user) == Partner:
+
+        return jsonify({'user type': 'partner'})
 
 
 # delete user
-@app.route('/customer/<public_id>', methods=['DELETE'])
+@app.route('/deleteUser', methods=['DELETE'])
 @token_required
-def delete_user(current_user, public_id):
-    if current_user.public_id == public_id:
-        user = Customer.query.filter_by(public_id=current_user.public_id).first()
+def delete_user(current_user):
+    """
+                     The body structure is as follows:
 
-        if not user:
-            return jsonify({'message': 'No user found!'})
+                       required login
 
-        db.session.delete(user)
-        db.session.commit()
 
-    return jsonify({'message': 'user has been deleted'})
+
+                     :return:
+                     'user': user.username,
+                                  'message': user deleted
+                     """
+
+    user = Customer.query.filter(Customer.public_id == current_user.public_id).first() or Courier.query.filter(
+        Courier.public_id == current_user.public_id).first() or Partner.query.filter(
+        Partner.public_id == current_user.public_id).first()
+
+    if not user:
+        return jsonify({'message': 'No user found!'}), 404
+
+    db.session.delete(user)
+    db.session.commit()
+
+    return jsonify({'user': user.username,
+                    'message': 'user deleted'})
 
 
 # edit user info
-# @app.route('/user/<string:public_id>', methods=['PUT'])
-# def edit_user(public_id):
-#     user = Customer.query.filter_by(public_id=public_id).first()
-#
-#     if not user:
-#         return jsonify({'message': 'No user found!'})
-#
-#     user.username = input()
-#     user.email = input()
-#     user.phoneNumber = input()
-#     user.address = input()
-#
-#     db.session.commit()
-#
-#     return jsonify({'message': 'user has been edited'})
-#     pass
+@app.route('/edit_user', methods=['PUT'])
+@token_required
+def edit_user(current_user):
+    """
+           The body structure is as follows:
+           {
+               username: <username:string>,
+               password: <password:string>,
+               email: <email:string>,
+
+
+           }
+           :return:
+           'user id': user.public_id,
+                        'username': user.username,
+                        'email': user.email
+           """
+
+    if not current_user:
+        return jsonify({'message': 'No user found'}), 404
+
+    if type(current_user) == Customer:
+        data = request.get_json()
+        username = data['username']
+        email = data['email']
+        phone_number = data['phone_number']
+        address = data['address']
+
+        if not username or not email or not phone_number or not address:
+            return jsonify({'message': 'All parameters must be filled'})
+        if Customer.query.filter_by(username=username).first() or Partner.query.filter_by(
+                username=username).first() or Courier.query.filter_by(username=username).first():
+            return jsonify({'message': 'username is already taken '}), 400
+        if Customer.query.filter_by(email=email).first() or Partner.query.filter_by(
+                email=email).first() or Courier.query.filter_by(email=email).first():
+            return jsonify({'message': 'email is already taken '}), 400
+
+        current_user.username = username
+        current_user.email = email
+        current_user.phoneNumber = phone_number
+        current_user.address = address
+
+        db.session.commit()
+        return jsonify({'public_id': current_user.public_id,
+                        'username': current_user.username,
+                        'email': current_user.email,
+                        'phone_number': current_user.phoneNumber,
+                        'address': current_user.address,
+                        'message': 'Customer has been edited'})
+
+    elif type(current_user) == Partner:
+
+        data = request.get_json()
+        username = data['username']
+        email = data['email']
+
+        if not username or not email:
+            return jsonify({'message': 'All parameters must be filled'})
+        if Customer.query.filter_by(username=username).first() or Partner.query.filter_by(
+                username=username).first() or Courier.query.filter_by(username=username).first():
+            return jsonify({'message': 'username is already taken '}), 400
+        if Customer.query.filter_by(email=email).first() or Partner.query.filter_by(
+                email=email).first() or Courier.query.filter_by(email=email).first():
+            return jsonify({'message': 'email is already taken '}), 400
+
+        current_user.username = username
+        current_user.email = email
+
+        db.session.commit()
+        return jsonify({'public_id': current_user.public_id,
+                        'username': current_user.username,
+                        'email': current_user.email,
+                        'message': 'Partner has been edited'})
+
+    elif type(current_user) == Courier:
+
+        data = request.get_json()
+        username = data['username']
+        email = data['email']
+
+        if not username or not email:
+            return jsonify({'message': 'All parameters must be filled'})
+        if Customer.query.filter_by(username=username).first() or Partner.query.filter_by(
+                username=username).first() or Courier.query.filter_by(username=username).first():
+            return jsonify({'message': 'username is already taken '}), 400
+        if Customer.query.filter_by(email=email).first() or Partner.query.filter_by(
+                email=email).first() or Courier.query.filter_by(email=email).first():
+            return jsonify({'message': 'email is already taken '}), 400
+
+        current_user.username = username
+        current_user.email = email
+
+        db.session.commit()
+        return jsonify({'public_id': current_user.public_id,
+                        'username': current_user.username,
+                        'email': current_user.email,
+                        'message': 'Courier has been edited'})
 
 
 # edit product info
-# @app.route('/product/<string:public_id>', methods=['PUT'])
-# def edit_product(public_id):
-#     partner = Partner.query.filter_by(public_id=public_id).first()
-#     product = Product.query.filter_by(db.ForeignKey).first()
-#
-#     if product.partner_id != partner.id:
-#         return jsonify({'message': 'No product found!'})
-#
-#     else:
-#         product.title = input()
-#         product.content = input()
-#         product.price = input()
-#         product.product_category_id = input()
-#
-#     db.session.commit()
-#
-#     return jsonify({'message': 'product has been edited'})
-#     pass
+@app.route('/edit_product/<int:id>', methods=['PUT'])
+@token_required
+def edit_product(current_user, id):
+    """
+         The body structure is as follows:
+         {
+             title: <title>,
+             content: <content>,
+             price: <int:price>,
+             category: <int:category>,
+
+         }
+
+         :return:
+         'product': product.title,
+         'content': product.content,
+         'price': product.price,
+         'category': product.category,
+         """
+
+    if type(current_user) != Partner:
+        return jsonify({'message': 'Can not perform action'}), 403
+    else:
+        product = Product.query.filter_by(id=id).first()
+        data = request.get_json()
+        title = data['title']
+        content = data['content']
+        price = data['price']
+        category = data['category']
+
+    if not title or not content or not price or not category:
+        return jsonify({'message': 'all parameters must be filled'})
+    else:
+        product.title = title
+        product.content = content
+        product.price = price
+        product.product_category_id = category
+
+        db.session.commit()
+        return jsonify({'product': product.title,
+                        'content': product.content,
+                        'price': product.price,
+                        'category': product.category,
+                        'message': 'Product has been edited!'})
 
 
 @app.route('/deleteProduct/<int:id>', methods=['DELETE'])
-def delete_product(id):
-    product = Product.query.filter_by(id=id).first()
+@token_required
+def delete_product(current_user, id):
+    if type(current_user) != Partner:
+        return jsonify({'message': 'Cannot perform that function'}), 403
 
+    product = Product.query.filter(Product.id == id).first()
     if not product:
-        return jsonify({'message': 'No product found!'})
+        return jsonify({'message': 'No product found!'}), 404
+    if current_user.public_id != product.partner_id:
+        return jsonify({'message': 'user can not delete this item'}), 403
 
     db.session.delete(product)
     db.session.commit()
 
-    return jsonify({'message': 'product has been deleted'})
+    return jsonify({'product': product.title,
+                    'product id': product.id,
+                    'message': 'product deleted'})
 
 
 # gets all product(non auth needed)
@@ -291,19 +495,35 @@ def get_all_products():
 
     output = []
     for product in products:
-        product_data = {'title': product.title, 'content': product.content}
+        product_data = {'title': product.title,
+                        'content': product.content,
+                        'price': product.price}
         output.append(product_data)
 
-    return jsonify({'product': output})
+    return jsonify({'products': output})
 
 
-# need to fix this after we have auth function
 # add new product
 @app.route('/addProduct', methods=['POST'])
 @token_required
 def new_product(current_user):
-    if current_user is Partner:
-        return jsonify({'message': 'Cannot perform that function '})
+    """
+     The body structure is as follows:
+     {
+         title: <title>,
+         content: <content>,
+         price: <int:price>,
+         category: <int:category>,
+
+     }
+     :return:
+
+     'product': new_order.id,
+     'customer': current_user.public_id,
+     'partner id': partner_id
+     """
+    if type(current_user) != Partner:
+        return jsonify({'message': 'Cannot perform that function '}), 405
     data = request.get_json()
     title = data['title']
     content = data['content']
@@ -313,12 +533,15 @@ def new_product(current_user):
     if not title or not content:
         return jsonify({'message': 'all parameters must be filled'})
     else:
-        product = Product(title=title, content=content, price=price, user_id=current_user.public_id, product_category_id=category)
+        product = Product(title=title, content=content, price=price, user_id=current_user.public_id,
+                          product_category_id=category)
         db.session.add(product)
         db.session.commit()
-        return jsonify({'product': title,
-                        'content': content,
-                        'category': category})
+        return jsonify({'product':
+                            {'title': title,
+                             'content': content,
+                             'price': price,
+                             'category': category}})
 
 
 @app.route('/productCategory/<int:category>', methods=['GET'])
@@ -337,8 +560,8 @@ def get_product_by_category(category):
             'price': product.price,
             'category': product.name
         }
-
         output.append(user_data)
+
     return jsonify({'products': output})
 
 
@@ -383,8 +606,11 @@ def order_products(current_user):
         ]
     }
     :return:
+    'Order': new_order.id,
+    'customer': current_user.public_id,
+    'partner id': partner_id
     """
-    if current_user is Customer:
+    if type(current_user) != Customer:
         return jsonify({'message': 'Cannot perform that function '})
     data = request.get_json()
     partner_id = data['partner_id']
@@ -399,6 +625,7 @@ def order_products(current_user):
         db.session.add(products)
 
     db.session.commit()
-    return jsonify({'Order': new_order.id,
-                    'customer': current_user.public_id,
-                    'partner id': partner_id})
+    return jsonify({'Order':
+                    {'order id': new_order.id,
+                     'customer': current_user.public_id,
+                     'partner id': partner_id}})
