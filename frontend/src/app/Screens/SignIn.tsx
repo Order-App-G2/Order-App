@@ -1,26 +1,22 @@
 import React, { Component } from 'react'
 import './SignIn.css'
-import { Link } from 'react-router-dom';
-
+import { Link, Navigate , NavLink} from 'react-router-dom';
+// import { Navigate } from 'react-router-dom';
+import { connect } from "react-redux";
+import { login } from '../../redux/actions/authAction';
 
 interface SignInProps {
+    login: (username: any, password: any) => any,
+    isLogedIn: boolean
 }
 
 interface SignInState {
     isLogin: boolean,
     isLoading: boolean,
-    user: User,
     error: boolean,
-    success: boolean
-}
-
-interface User {
-    username: '',
-    email: '',
-    password: '',
-    address?: '',
-    phoneNumber?: ''
-
+    success: boolean,
+    userName: string,
+    password: string
 }
 
 export const FormHeader = (props: any) => (
@@ -42,37 +38,6 @@ export const FormInput = (props: any) => (
     </div>
 );
 
-const OtherMethods = (props: any) => (
-    <div id="alternativeLogin">
-        <label>Or sign in with:</label>
-        <div id="iconGroup">
-            <Facebook />
-            <Twitter />
-            <Google />
-        </div>
-    </div>
-);
-
-const Facebook = (props: any) => (
-    <a href="#" id="facebookIcon"></a>
-);
-
-const Twitter = (props: any) => (
-    <a href="#" id="twitterIcon"></a>
-);
-
-const Google = (props: any) => (
-    <a href="#" id="googleIcon"></a>
-);
-
-const Form = (props: any) => (
-    <div>
-        <FormInput description="Username" placeholder="Enter your username" type="text" />
-        <FormInput description="Password" placeholder="Enter your password" type="password" />
-        <FormButton title="Log in" />
-        <p>Need an account? <Link to={{pathname:'signUp'}} className='signUp'>Sign up</Link></p>
-    </div>
-);
 
 
 export class SignIn extends Component<SignInProps, SignInState> {
@@ -84,32 +49,62 @@ export class SignIn extends Component<SignInProps, SignInState> {
             isLoading: false,
             error: false,
             success: false,
-            user: {
-                username: '',
-                email: '',
-                password: '',
-                address: '',
-                phoneNumber: ''
-            }
+            userName: '',
+            password: '',
         }
     }
-
-
     submitHandler = (event: any) => {
 
+        event.preventDefault();
+
+        this.setState({
+            success: false,
+        });
+
+        this.props.login(this.state.userName, this.state.password)
+            .then(() => {
+                this.setState({
+                    success: true,
+                });
+            })
+            .catch(() => {
+                this.setState({
+                    success: false,
+                });
+            });
+
     };
+
+    returnFormLogIn = () => {
+        return (<div>
+            <FormHeader title="Log in to your account" />
+            <FormInput description="Username" placeholder="Enter your username" type="text" onChange={(e: any) => { this.setState({ userName: e.target.value }) }} />
+            <FormInput description="Password" placeholder="Enter your password" type="password" onChange={(e: any) => { this.setState({ password: e.target.value }) }} />
+            <FormButton title="Log in" onClick={this.submitHandler} />
+            <p className='redirectToSignUp'>Need an account ? <Link to='signUp' className='signUp'> Sign up</Link></p>
+        </div>)
+    }
 
     render() {
         return (
             <div id="SignInForm">
-                <FormHeader title="Log in to your account" />
-                <Form />
-                {/* <OtherMethods /> */}
+                {!this.props.isLogedIn && this.returnFormLogIn()}
+                {this.props.isLogedIn && <FormHeader title="You are already loged In" />}
             </div>
 
         )
     }
 }
+function mapStateToProps(state: any) {
+    return {
+        isLogedIn: state.authReducer.isLoggedIn
+    };
+}
 
-export default SignIn
+function mapDispatchToProps(dispatch: any) {
+    return {
+        login: (username: any, password: any) => dispatch(login(username, password)),
+    }
+}
+export default connect(mapStateToProps, mapDispatchToProps)(SignIn)
 
