@@ -1,3 +1,4 @@
+import { trackForMutations } from "@reduxjs/toolkit/dist/immutableStateInvariantMiddleware";
 import {
     REGISTER_SUCCESS,
     REGISTER_FAIL,
@@ -8,11 +9,14 @@ import {
   
   const user = JSON.parse(localStorage.getItem("user") as string);
   
-  const initialState = user
+  const userInitialState = user
     ? { isLoggedIn: true, user }
     : { isLoggedIn: false, user: null };
-  
-  export default function (state = initialState, action: any) {
+
+
+
+
+  export default function (state = userInitialState, action: any) {
     const { type, payload } = action;
   
     switch (type) {

@@ -281,6 +281,7 @@ def change_availability(current_user):
 def get_one_user(current_user):
     if type(current_user) == Customer:
 
+ matej
         return jsonify({'usertype': 'customer'})
 
     if type(current_user) == Courier:

@@ -13,12 +13,10 @@
   }
   
  .homePage {
-
+  justify-content: center;
+  display: flex;
  }
- .meals{
-     justify-content: center;
-     display: flex;
- }
+ 
 
  .centered {
     position: absolute;

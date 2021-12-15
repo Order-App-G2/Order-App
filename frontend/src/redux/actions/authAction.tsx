@@ -26,6 +26,7 @@ export const registerCustomer = (username: any, password: any, email: any, phone
                 const message =
                     (error.response &&
                         error.response.data &&
+               
                         error.response.data.message) ||
                     error.message ||
                     error.toString();
