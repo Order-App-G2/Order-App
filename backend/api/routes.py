@@ -281,14 +281,15 @@ def change_availability(current_user):
 def get_one_user(current_user):
     if type(current_user) == Customer:
 
-        return jsonify({'user type': 'customer'})
+ matej
+        return jsonify({'usertype': 'customer'})
 
     if type(current_user) == Courier:
 
-        return jsonify({'user type': 'courier'})
+        return jsonify({'usertype': 'courier'})
     if type(current_user) == Partner:
 
-        return jsonify({'user type': 'partner'})
+        return jsonify({'usertype': 'partner'})
 
 
 # delete user
