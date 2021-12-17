@@ -649,3 +649,26 @@ def add_new_category(current_user):
         return jsonify({'category': new_category.name,
                         'message': 'has been added'})
 
+
+@app.route('/orderInformation', methods=['GET'])
+@token_required
+def check_order_information(current_user):
+
+    if type(current_user) != Customer:
+        return jsonify({'message': 'Cannot perform that function '})
+
+    q = db.session.query(
+        Order.id,
+        Order.order_date,
+        Status.order_status).filter(Order.customer_id == current_user.public_id).all()
+
+    output = []
+    for order in q:
+        user_data = {
+            'order_date': order.order_date,
+            'order_id': order.id,
+            'order_status': order.order_status
+        }
+
+        output.append(user_data)
+    return jsonify({'order': output})
