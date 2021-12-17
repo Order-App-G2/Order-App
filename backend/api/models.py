@@ -83,7 +83,6 @@ class Category(db.Model):
         self.name = name
 
 
-
 class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     order_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
