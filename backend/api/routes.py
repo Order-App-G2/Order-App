@@ -281,7 +281,6 @@ def change_availability(current_user):
 def get_one_user(current_user):
     if type(current_user) == Customer:
 
- matej
         return jsonify({'usertype': 'customer'})
 
     if type(current_user) == Courier:
@@ -630,3 +629,23 @@ def order_products(current_user):
                     {'order id': new_order.id,
                      'customer': current_user.public_id,
                      'partner id': partner_id}})
+
+
+@app.route('/addCategory', methods=['POST'])
+@token_required
+def add_new_category(current_user):
+    if type(current_user) != Partner:
+        return jsonify({'message': 'Cannot perform that function '})
+
+    data = request.get_json()
+    category_name = data['category_name']
+    new_category = Category(name=category_name)
+    if Category.query.filter_by(name=category_name).first():
+        return jsonify({'message': 'category is already exists '}), 400
+    else:
+        db.session.add(new_category)
+        db.session.commit()
+
+        return jsonify({'category': new_category.name,
+                        'message': 'has been added'})
+
