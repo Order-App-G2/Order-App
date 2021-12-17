@@ -79,6 +79,10 @@ class Category(db.Model):
 
     category_product = db.relationship('Product', backref='category', lazy=True)
 
+    def __init__(self, name):
+        self.name = name
+
+
 
 class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
