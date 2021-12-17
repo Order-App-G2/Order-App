@@ -5,7 +5,7 @@ import jwt from 'jwt-decode';
 const API_URL = "http://localhost:5000/";
 
 interface User {
-    public_id: any, 
+    public_id: any,
     exp: any
 }
 
@@ -24,16 +24,18 @@ class AuthService {
         }
 
         return axios
-            .post(API_URL + 'login', user , {headers: header})
+            .post(API_URL + 'login', user, { headers: header })
             .then((response) => {
                 if (response.data.token) {
                     localStorage.setItem("user", JSON.stringify(response.data));
-                    const user: User= jwt(response.data.token)
-                    console.log(user)
-                    return  axios.get(API_URL + `customer/${user.public_id}`)
-                                .then((res)=>{
-                                    console.log(res)
-                                })
+                    // const token: User = jwt(response.data.token)
+                    const header = {
+                            'token': response.data.token
+                    }
+                    return axios.get(API_URL + `userRole`, {headers: header})
+                        .then((res) => {
+                            return  res.data.usertype
+                        })
                 }
 
                 return response.data;

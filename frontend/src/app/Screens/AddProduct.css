@@ -1,0 +1,46 @@
+.AddProductBorder{
+    max-width: 500px;
+    min-width: 300px;
+    max-height: 700px;
+    width: 30%;
+    height: 60%;
+    margin: 100px auto;
+    background-color: #FFFFFF;
+    border-radius: 25px;
+}
+
+.dropDown{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 2rem;
+    max-width: 100%;
+}
+
+.labelDropDown{
+    align-self: start;
+    padding-left: 4.5rem;
+    padding-bottom: 0.5rem;
+    color: rgba(187,187,187,0.9);
+}
+.selectDropDown{
+    width: 81%;
+    box-sizing: border-box;
+    border: none;
+    font-size: 1.3rem;
+    padding-left: 1.5rem;
+    padding-bottom: 1rem;
+    box-shadow: inset 0px -3px 0px 0px rgb(187 187 187 / 20%);
+    transition: box-shadow 0.2s ease-in;
+}
+
+.selectDropDown:focus-visible{
+    width: 81%;
+    box-sizing: border-box;
+    border: none;
+    font-size: 1.3rem;
+    padding-left: 1.5rem;
+    padding-bottom: 1rem;
+    box-shadow: inset 0px -3px 0px 0px rgb(187 187 187 / 20%);
+    transition: box-shadow 0.2s ease-in;
+}

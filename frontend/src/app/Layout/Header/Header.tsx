@@ -1,4 +1,3 @@
-<<<<<<< RRaycheva
 import React, { Component } from 'react'
 import { Fragment } from 'react';
 import { Link } from 'react-router-dom';
@@ -34,8 +33,9 @@ export class Header extends Component<HeaderProps, HeaderState> {
               <li>  <Link to='/signUp'>Register</Link> </li>
               {this.props.isLogedIn && <li>  <Link to='/product'>Product</Link> </li>}
               {this.props.isLogedIn && <li onClick={this.props.logOut}> <Link to='/'>Log out</Link> </li>}
-             { this.props.isLogedIn && <li> <HeaderCartButton /></li>}
-              <li> <Link to="/Search">Search</Link></li>
+              {this.props.isLogedIn && <li> <HeaderCartButton /></li>}
+              <Link to='/addProduct'>Add product</Link>
+              {/* <li> <Link to="/Search">Search</Link></li> */}
             </ul>
           </nav>
         </header>

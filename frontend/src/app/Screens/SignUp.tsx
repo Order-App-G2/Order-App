@@ -54,10 +54,6 @@ const Customer = (props: any) => (
 export class SignUp extends Component<SignUpProps, SignUpState> {
     constructor(props: SignUpProps) {
         super(props);
-        // const custEmailRef = React.createRef();
-        // const custUserNameRef = React.createRef();
-        // const custAddressRef = React.createRef();
-        // const custPasswordref = React.createRef()
 
         this.handleSubmitCustomerForm = this.handleSubmitCustomerForm.bind(this)
 

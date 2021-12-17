@@ -10,10 +10,14 @@ import {
   const user = JSON.parse(localStorage.getItem("user") as string);
   
   const userInitialState = user
-    ? { isLoggedIn: true, user }
+    ? { isLoggedIn: true, user , type: ''}
     : { isLoggedIn: false, user: null };
 
 
+    const initiallState = {
+    
+    }
+  const allInitialState = userInitialState && initiallState
 
 
   export default function (state = userInitialState, action: any) {
@@ -35,6 +39,7 @@ import {
           ...state,
           isLoggedIn: true,
           user: payload.user,
+          type: payload.type
         };
       case LOGIN_FAIL:
         return {
