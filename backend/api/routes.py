@@ -674,7 +674,7 @@ def check_order_information(current_user):
     return jsonify({'order': output})
 
 
-@app.route('/orderStatus/<int:order_id>/<int:status>', methods=['PUT'])
+@app.route('/updateOrderStatus/<int:order_id>/<int:status>', methods=['PUT'])
 @token_required
 def update_order_status(current_user, order_id, status):
 
@@ -694,3 +694,31 @@ def update_order_status(current_user, order_id, status):
 
         db.session.commit()
         return jsonify({'message': 'Order status updated by courier'})
+
+
+@app.route('/updateOrderCourier/<int:order_id>', methods=['PUT'])
+@token_required
+def update_order_courier(current_user, order_id):
+
+    if type(current_user) != Partner:
+        return jsonify({'message': 'Can not perform that action'})
+
+    order = Order.query.filter_by(id=order_id).first()
+    courier = Courier.query.filter_by(available=True).first()
+
+    if not order:
+        return jsonify({'message': 'No order matches id'})
+
+    if not courier:
+        return jsonify({'message': 'No available couriers at the moment'})
+
+    if order.courier:
+        return jsonify({'message': 'Order already has a courier assigned'})
+    else:
+        order.courier = courier.id
+        courier.available = False
+
+        db.session.commit()
+        return jsonify({'courier': courier.username,
+                        'message': 'has been assigned to order# ',
+                        'order_id': order.id})
