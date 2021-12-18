@@ -672,3 +672,25 @@ def check_order_information(current_user):
 
         output.append(user_data)
     return jsonify({'order': output})
+
+
+@app.route('/orderStatus/<int:order_id>/<int:status>', methods=['PUT'])
+@token_required
+def update_order_status(current_user, order_id, status):
+
+    if type(current_user) == Customer:
+        return jsonify({'message': 'Can not perform that action'})
+
+    order = Order.query.filter_by(id=order_id).first()
+
+    if (type(current_user) == Partner) & order.Partner_id == current_user.id:
+        order.Order_status = status
+
+        db.session.commit()
+        return jsonify({'message': 'Order status updated by partner'})
+
+    if (type(current_user) == Courier) & order.courier == current_user.id:
+        order.Order_status = status
+
+        db.session.commit()
+        return jsonify({'message': 'Order status updated by courier'})
