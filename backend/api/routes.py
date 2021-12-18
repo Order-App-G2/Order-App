@@ -682,18 +682,40 @@ def update_order_status(current_user, order_id, status):
         return jsonify({'message': 'Can not perform that action'})
 
     order = Order.query.filter_by(id=order_id).first()
+    courier = Courier.query.filter_by(id=order.courier).first()
 
-    if (type(current_user) == Partner) & order.Partner_id == current_user.id:
+    if not order:
+        return jsonify({'message': 'No order matches id'})
+
+    if (status != 1) & (status != 2) & (status != 3) & (status != 4) & (status != 5):
+        return jsonify({'message': 'Invalid status number'})
+
+    if order.Partner_id != current_user.id:
+        return jsonify({'message': 'Order does not match partner'})
+
+    if (type(current_user) == Partner) & (order.Partner_id == current_user.id):
+        if status == 4:
+            return jsonify({'message': 'Cannot perform that function'})
+
         order.Order_status = status
 
         db.session.commit()
-        return jsonify({'message': 'Order status updated by partner'})
+        return jsonify({'order_status': order.Order_status})
 
-    if (type(current_user) == Courier) & order.courier == current_user.id:
+    if not courier:
+        return jsonify({'message': 'Cannot perform that action because order does not have courier'})
+
+    if (type(current_user) == Courier) & (order.courier == current_user.id):
+        if (status != 4) & (status != 5):
+            return jsonify({'message': 'Cannot perform that function'})
+
         order.Order_status = status
 
+        if order.Order_status == 5:
+            courier.available = True
+
         db.session.commit()
-        return jsonify({'message': 'Order status updated by courier'})
+        return jsonify({'order_status': order.Order_status})
 
 
 @app.route('/updateOrderCourier/<int:order_id>', methods=['PUT'])
@@ -701,7 +723,7 @@ def update_order_status(current_user, order_id, status):
 def update_order_courier(current_user, order_id):
 
     if type(current_user) != Partner:
-        return jsonify({'message': 'Can not perform that action'})
+        return jsonify({'message': 'Cannot perform that action'})
 
     order = Order.query.filter_by(id=order_id).first()
     courier = Courier.query.filter_by(available=True).first()
