@@ -17,32 +17,11 @@ interface CourierHomePageState {
 
 export default class CourierHomePage extends Component<CourierHomePageProps, CourierHomePageState > {
 
-    private readonly mealsMockupData: AvailableMeals = [
-        {
-            title: 'McDonalds Burger',
-            category: 'Fast Food',
-            content: 'burger patty',
-            price: 5.2,
-        }
-    ]
-    renderAvailableMeals = () => {
-        return this.mealsMockupData.map(meal=>{
-            return <MealItem title={meal.title} price={meal.price} category={meal.category} content={meal.content} />
-        });
-    }
 
     render() {
         return (
             <div className="homePage">
-                <div className={classes['main-image']}>
-                    <div className={classes.container}>
-                        <img src={mealsImage} alt='A table full of delicious food!' />
-                    </div>
-                </div>
-                <div className={classes.homePage}>
-                    <MealsSummary/>
-                   {this.renderAvailableMeals()}
-                </div>
+                hi courier page 
             </div>
         )
     }

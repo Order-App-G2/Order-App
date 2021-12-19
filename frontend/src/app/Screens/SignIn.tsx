@@ -34,7 +34,7 @@ export const FormButton = (props: any) => (
 export const FormInput = (props: any) => (
     <div className="row">
         <label>{props.description}</label>
-        <input type={props.type} placeholder={props.placeholder} onChange={props.onChange} />
+        <input type={props.type} placeholder={props.placeholder} value={props.value} onChange={props.onChange} />
     </div>
 );
 

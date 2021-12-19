@@ -11,7 +11,7 @@ import {
   
   const userInitialState = user
     ? { isLoggedIn: true, user , type: ''}
-    : { isLoggedIn: false, user: null };
+    : { isLoggedIn: false, user: null, type: '' };
 
 
     const initiallState = {
