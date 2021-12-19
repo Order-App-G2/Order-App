@@ -10,11 +10,13 @@ import { connect } from "react-redux";
 import MealItem from '../Meals/MealItem';
 import { Navigate } from 'react-router'
 import CustomerHomePage from './CustomerHomePage';
-import { AddProduct } from './AddProduct';
+import  AddProduct  from './AddProduct';
+import CourierHomePage from './CourierHomePage';
 
 type UserType = 'courier' | 'partner' | 'customer';
-interface HomePageProps{
+interface HomePageProps {
     userType: UserType;
+    isLogedIn: boolean
 }
 
 interface HomePageState {
@@ -22,22 +24,24 @@ interface HomePageState {
 }
 
 
-export class HomePage extends Component<HomePageProps, HomePageState > {
+export class HomePage extends Component<HomePageProps, HomePageState> {
 
-    constructor(props: HomePageProps){
+    constructor(props: HomePageProps) {
         super(props);
-        
+
         this.state = {
-            
+
         }
     }
 
     renderHome = () => {
-        switch(this.props.userType){
+        switch (this.props.userType) {
             case 'customer':
-                return <CustomerHomePage />;
+                return  this.props.isLogedIn && <CustomerHomePage />;
             case 'partner':
-                return <AddProduct/>
+                return this.props.isLogedIn && <AddProduct />
+            case 'courier':
+                return this.props.isLogedIn && <CourierHomePage />
             default:
                 return <Navigate replace to='signIn' />;
         }
@@ -52,12 +56,13 @@ export class HomePage extends Component<HomePageProps, HomePageState > {
 
 function mapStateToProps(state: any) {
     return {
-     userType: state.authReducer.type
+        userType: state.authReducer.type,
+        isLogedIn: state.authReducer.isLoggedIn
     };
 }
 function mapDispatchToProps(dispatch: any) {
     return {
-        
+
     }
 }
 

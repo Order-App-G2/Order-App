@@ -4,24 +4,27 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { Provider } from 'react-redux';
-import {createStore, applyMiddleware } from 'redux'
-import {rootReducer} from './redux/rootReducer'
+import { createStore, applyMiddleware } from 'redux'
+import { rootReducer } from './redux/rootReducer'
 import { composeWithDevTools } from 'redux-devtools-extension';
 import { BrowserRouter } from 'react-router-dom';
 import thunk from "redux-thunk";
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { getCategory } from './redux/actions/userAction'
 
 const middleware = [thunk];
 
 
 const store = createStore(rootReducer, composeWithDevTools(applyMiddleware(...middleware)))
 
+
+store.dispatch(getCategory)
 ReactDOM.render(
   <React.StrictMode>
     <Provider store={store}>
       <BrowserRouter>
-         <App />
-    </BrowserRouter>
+        <App />
+      </BrowserRouter>
     </Provider>
   </React.StrictMode>,
   document.getElementById('root')

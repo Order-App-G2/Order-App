@@ -1,12 +1,14 @@
 import {
     CREATE_PRODUCT_SUCCESS,
     CREATE_PRODUCT_FAIL,
-    SET_MESSAGE
+    SET_MESSAGE,
+    GET_CATEGORY_FAIL,
+    GET_CATEGORY_SUCCESS
 } from "../types";
 import UserService from "../../services/user.service"
 
-export const createProduct = (title: string, content: string, price: number, category: string) => (dispatch: any) => {
-    return UserService.createProduct(title, content, price, category)
+export const createProduct = (title: string, content: string, price: number, category_id: number) => (dispatch: any) => {
+    return UserService.createProduct(title, content, price, category_id)
         .then((response) => {
             dispatch({
                 type: CREATE_PRODUCT_SUCCESS
@@ -38,4 +40,22 @@ export const createProduct = (title: string, content: string, price: number, cat
                 return Promise.reject();
             }
         )
+}
+
+
+export const getCategory = () => (dispatch: any) => {
+    return UserService.getAllCategory()
+        .then((response) => {
+            dispatch({
+                type: GET_CATEGORY_SUCCESS, 
+                payload: response.data
+            })
+            dispatch({
+                type: GET_CATEGORY_FAIL,
+                payload: response.data.message            
+            })
+
+            return Promise.resolve();
+
+        })
 }

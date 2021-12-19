@@ -16,11 +16,27 @@ interface HeaderProps {
 }
 
 interface HeaderState {
-
+  isLogedIn: boolean
 }
 
-
 export class Header extends Component<HeaderProps, HeaderState> {
+   
+  constructor(props:HeaderProps){
+    super(props);
+
+    this.state = {
+      isLogedIn: false
+    }
+  }
+
+  handleLogOut = () => {
+  this.props.logOut()
+    this.setState({
+      isLogedIn: false
+    })
+  }
+
+
   render() {
     return (
       <Fragment>
@@ -31,7 +47,7 @@ export class Header extends Component<HeaderProps, HeaderState> {
               <li><Link to='/'>Home</Link></li>
               {!this.props.isLogedIn && <li> <Link to='/signIn'>Login</Link></li>}
               {this.props.isLogedIn && <li>  <Link to='/product'>Product</Link> </li>}
-              {this.props.isLogedIn && <li onClick={this.props.logOut}> <Link to='/'>Log out</Link> </li>}
+              {this.props.isLogedIn && <li onClick={this.handleLogOut}> <Link to='/'>Log out</Link> </li>}
               {this.props.isLogedIn && <li> <HeaderCartButton /></li>}
               {/* <li> <Link to="/Search">Search</Link></li> */}
             </ul>
