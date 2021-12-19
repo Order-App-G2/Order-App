@@ -744,3 +744,18 @@ def update_order_courier(current_user, order_id):
         return jsonify({'courier': courier.username,
                         'message': 'has been assigned to order# ',
                         'order_id': order.id})
+
+
+@app.route('/getAllCategories', methods=['GET'])
+def get_all_categories():
+
+    categories = Category.query.all()
+
+    output = []
+    for category in categories:
+        product_data = {'category_id': category.id,
+                        'category': category.name}
+
+        output.append(product_data)
+
+    return jsonify({'categories': output})
