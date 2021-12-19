@@ -26,7 +26,7 @@ export const registerCustomer = (username: any, password: any, email: any, phone
                 const message =
                     (error.response &&
                         error.response.data &&
-               
+
                         error.response.data.message) ||
                     error.message ||
                     error.toString();
@@ -59,61 +59,61 @@ export const registerPartner = (username: any, password: any, email: any) => (di
             })
             return Promise.resolve();
         },
-        (error) => {
-            const message =
-                (error.response &&
-                    error.response.data &&
-                    error.response.data.message) ||
-                error.message ||
-                error.toString();
+            (error) => {
+                const message =
+                    (error.response &&
+                        error.response.data &&
+                        error.response.data.message) ||
+                    error.message ||
+                    error.toString();
 
-            dispatch({
-                type: REGISTER_FAIL,
-            });
+                dispatch({
+                    type: REGISTER_FAIL,
+                });
 
-            dispatch({
-                type: SET_MESSAGE,
-                payload: message,
-            });
+                dispatch({
+                    type: SET_MESSAGE,
+                    payload: message,
+                });
 
-            return Promise.reject();
-        }
+                return Promise.reject();
+            }
         )
 }
 
 export const registerCourier = (username: any, password: any, email: any) => (dispatch: any) => {
-   return AuthService.registerCourier(username, password, email)
-   .then((response) => {
-    dispatch({
-        type: REGISTER_SUCCESS
-    })
+    return AuthService.registerCourier(username, password, email)
+        .then((response) => {
+            dispatch({
+                type: REGISTER_SUCCESS
+            })
 
-    dispatch({
-        type: SET_MESSAGE,
-        payload: response.data.message
-    })
-    return Promise.resolve();
-},
-(error) => {
-    const message =
-        (error.response &&
-            error.response.data &&
-            error.response.data.message) ||
-        error.message ||
-        error.toString();
+            dispatch({
+                type: SET_MESSAGE,
+                payload: response.data.message
+            })
+            return Promise.resolve();
+        },
+            (error) => {
+                const message =
+                    (error.response &&
+                        error.response.data &&
+                        error.response.data.message) ||
+                    error.message ||
+                    error.toString();
 
-    dispatch({
-        type: REGISTER_FAIL,
-    });
+                dispatch({
+                    type: REGISTER_FAIL,
+                });
 
-    dispatch({
-        type: SET_MESSAGE,
-        payload: message,
-    });
+                dispatch({
+                    type: SET_MESSAGE,
+                    payload: message,
+                });
 
-    return Promise.reject();
-}
-)
+                return Promise.reject();
+            }
+        )
 }
 
 
@@ -123,7 +123,7 @@ export const login = (username: any, password: any) => (dispatch: any) => {
         (data) => {
             dispatch({
                 type: LOGIN_SUCCESS,
-                payload: { user: data },
+                payload: { type: data },
             });
 
             return Promise.resolve();

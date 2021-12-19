@@ -4,25 +4,61 @@ import mealsImage from '../../assets/meals.jpg'
 import MealsSummary from '../Meals/MealsSummary';
 import Modal from '../Components/Modal/Modal';
 import Card from '../Components/Card/Card'
-import Meals from '../Meals/Meals';
+// import Meals from '../Meals/Meals';
+import { AvailableMeals } from '../Interfaces';
+import { connect } from "react-redux";
+import MealItem from '../Meals/MealItem';
+import { Navigate } from 'react-router'
+import CustomerHomePage from './CustomerHomePage';
+import { AddProduct } from './AddProduct';
 
-export class HomePage extends Component {
+type UserType = 'courier' | 'partner' | 'customer';
+interface HomePageProps{
+    userType: UserType;
+}
+
+interface HomePageState {
+
+}
+
+
+export class HomePage extends Component<HomePageProps, HomePageState > {
+
+    constructor(props: HomePageProps){
+        super(props);
+        
+        this.state = {
+            
+        }
+    }
+
+    renderHome = () => {
+        switch(this.props.userType){
+            case 'customer':
+                return <CustomerHomePage />;
+            case 'partner':
+                return <AddProduct/>
+            default:
+                return <Navigate replace to='signIn' />;
+        }
+    }
 
     render() {
         return (
-            <div className="homePage">
-                <div className={classes['main-image']}>
-                    <div className={classes.container}>
-                        <img src={mealsImage} alt='A table full of delicious food!' />
-                    </div>
-                </div>
-                <div className={classes.homePage}>
-                    <MealsSummary/>
-                   home page
-                </div>
-            </div>
+            this.renderHome()
         )
     }
 }
 
-export default HomePage
+function mapStateToProps(state: any) {
+    return {
+     userType: state.authReducer.type
+    };
+}
+function mapDispatchToProps(dispatch: any) {
+    return {
+        
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(HomePage)

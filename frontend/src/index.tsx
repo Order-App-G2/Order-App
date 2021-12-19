@@ -9,6 +9,7 @@ import {rootReducer} from './redux/rootReducer'
 import { composeWithDevTools } from 'redux-devtools-extension';
 import { BrowserRouter } from 'react-router-dom';
 import thunk from "redux-thunk";
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 const middleware = [thunk];
 

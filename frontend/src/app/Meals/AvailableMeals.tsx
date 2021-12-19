@@ -57,14 +57,14 @@ function AvailableMeals(props: any) {
     );
   }
 
-  const mealsList = meals.map((meal) => (
-    <MealItem  {...meal}/>
-  ));
+  // const mealsList = meals.map((meal) => (
+  //   <MealItem  {...meal}/>
+  // ));
 
   return (
     <section className={classes.meals}>
       <Card>
-        <ul>{mealsList}</ul>
+        {/* <ul>{mealsList}</ul> */}
       </Card>
     </section>
   );

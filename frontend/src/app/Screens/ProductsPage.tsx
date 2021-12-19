@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import Card from '../Components/Card/Card'
-import Meals from '../Meals/Meals';
+// import Meals from '../Meals/Meals';
 import './ProductPage.css';
 
 export class ProductsPage extends Component {
@@ -9,7 +9,7 @@ export class ProductsPage extends Component {
             <div className=''>
                  <Card>
                         <ul>
-                            <Meals/>
+                            {/* <Meals/> */}
                         </ul>
                    </Card>
             </div>

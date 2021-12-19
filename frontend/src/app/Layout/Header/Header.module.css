@@ -49,6 +49,11 @@
   font-weight: bold;
 }
 
+.header a:hover {
+  color: white;
+  opacity: 0.8;
+}
+
 .header button {
     cursor: pointer;
     font: inherit;

@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import './SignIn.css'
-import { Link, Navigate , NavLink} from 'react-router-dom';
+import { Link, Navigate, NavLink } from 'react-router-dom';
 // import { Navigate } from 'react-router-dom';
 import { connect } from "react-redux";
 import { login } from '../../redux/actions/authAction';
@@ -53,6 +53,7 @@ export class SignIn extends Component<SignInProps, SignInState> {
             password: '',
         }
     }
+
     submitHandler = (event: any) => {
 
         event.preventDefault();
@@ -72,7 +73,7 @@ export class SignIn extends Component<SignInProps, SignInState> {
                     success: false,
                 });
             });
-
+      
     };
 
     returnFormLogIn = () => {
@@ -81,7 +82,7 @@ export class SignIn extends Component<SignInProps, SignInState> {
             <FormInput description="Username" placeholder="Enter your username" type="text" onChange={(e: any) => { this.setState({ userName: e.target.value }) }} />
             <FormInput description="Password" placeholder="Enter your password" type="password" onChange={(e: any) => { this.setState({ password: e.target.value }) }} />
             <FormButton title="Log in" onClick={this.submitHandler} />
-            <p className='redirectToSignUp'>Need an account ? <Link to='signUp' className='signUp'> Sign up</Link></p>
+            <p className='redirectToSignUp'>Need an account ? <Link to={{ pathname: '/signUp' }} className='signUp'> Sign up</Link></p>
         </div>)
     }
 
