@@ -3,7 +3,9 @@ import {
     CREATE_PRODUCT_FAIL,
     SET_MESSAGE,
     GET_CATEGORY_FAIL,
-    GET_CATEGORY_SUCCESS
+    GET_CATEGORY_SUCCESS,
+    GET_FOOD_FAIL,
+    GET_FOOD_SUCCESS
 } from "../types";
 import UserService from "../../services/user.service"
 
@@ -52,6 +54,23 @@ export const getCategory = () => (dispatch: any) => {
             })
             dispatch({
                 type: GET_CATEGORY_FAIL,
+                payload: response.data.message            
+            })
+
+            return Promise.resolve();
+
+        })
+}
+
+export const getProduct = () => (dispatch: any) => {
+    return UserService.getFood()
+        .then((response) => {
+            dispatch({
+                type: GET_FOOD_SUCCESS, 
+                payload: response.data
+            })
+            dispatch({
+                type: GET_FOOD_FAIL,
                 payload: response.data.message            
             })
 
