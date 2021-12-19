@@ -7,19 +7,25 @@ import { DropdownButton, Dropdown } from 'react-bootstrap'
 import './AddProduct.css'
 
 interface SignUpProps {
-    createProduct: (title: string, content: string, price: number, category: string) => any
-
+    createProduct?: (title: string, content: string, price: number, category: string) => any
 }
 
 interface SignUpState {
     title: string,
     content: string,
     price: number,
-    category: string
+    category: string,
+    allCategories: string[],
 }
 
 
 export class AddProduct extends Component<SignUpProps, SignUpState> {
+    private readonly allCategoriesMockup = [
+        'Fast Food',
+        'Pizza',
+        'Japanese',
+        'Other',
+    ]
     constructor(props: SignUpProps) {
         super(props);
 
@@ -27,25 +33,31 @@ export class AddProduct extends Component<SignUpProps, SignUpState> {
             title: '',
             content: '',
             price: 0,
-            category: ''
+            category: '',
+            allCategories: this.allCategoriesMockup,
         }
     }
 
+    componentDidMount(){
+        // Retrieve all categories from backend
+        // fill redux store with all categories
+    }
 
     handleSubmitProduct = (e: Event) => {
         e.preventDefault();
-        this.props.createProduct(this.state.title, this.state.content, this.state.price, this.state.category)
+        this.props.createProduct && this.props.createProduct(this.state.title, this.state.content, this.state.price, this.state.category)
     }
 
     returnDropDownWithCategoryFood = () => {
         return (
             <form className='dropDown' action="/action_page.php">
-                <label  className='labelDropDown'>Choose a car:</label>
-                <select  className='selectDropDown' name="cars" id="cars">
-                    <option value="volvo">Volvo</option>
-                    <option value="saab">Saab</option>
-                    <option value="opel">Opel</option>
-                    <option value="audi">Audi</option>
+                <label  className='labelDropDown'>Choose a category:</label>
+                <select  className='selectDropDown' name="food-categories" id="food-categories">
+                {this.state.allCategories.map((c)=>{
+                    return (
+                        <option value={c.toLowerCase()}>{c}</option>
+                    );
+                })}
                 </select>
             </form>
         )
