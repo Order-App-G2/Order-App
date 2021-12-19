@@ -234,7 +234,7 @@ export class SignUp extends Component<SignUpProps, SignUpState> {
 }
 function mapStateToProps(state: any) {
     return {
-
+     
     };
 }
 

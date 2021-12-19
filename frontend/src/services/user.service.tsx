@@ -34,7 +34,7 @@ class UserService {
     }
    
     getCategoryFood() {
-        return axios.get();
+        return axios.get(API_URL, { headers: authHeader() as AxiosRequestHeaders } );
     }
 
 
