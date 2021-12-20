@@ -4,10 +4,11 @@ import mealsImage from '../../assets/meals.jpg';
 import { connect } from "react-redux";
 import MealsSummary from '../Meals/MealsSummary';
 import Modal from '../Components/Modal/Modal';
-import Card from '../Components/Card/Card';
+import './CustomerHomePage.css'
 import { getProduct } from './../../redux/actions/userAction';
 import { Meal } from '../Interfaces';
 import MealItem from '../Meals/MealItem';
+import { Link } from 'react-router-dom';
 
 interface CustomerHomePageProps {
     getProduct: () => any, 
@@ -25,9 +26,13 @@ export class CustomerHomePage extends Component<CustomerHomePageProps, CustomerH
         this.props.getProduct()
     }
 
+    handleClickMeal = () => {
+
+    }
+
     renderAvailableMeals = () => {
         return this.props.products.map((meal: Meal) => {
-            return <MealItem title={meal.title} price={meal.price} category={meal.category} content={meal.content} />
+            return (  <MealItem  id={meal.id} title={meal.title} price={meal.price} category={meal.category} content={meal.content} /> )
         });
     }
 
@@ -41,7 +46,9 @@ export class CustomerHomePage extends Component<CustomerHomePageProps, CustomerH
                 </div>
                 <div className={classes.homePage}>
                     <MealsSummary />
+                    <div className='wrapCard'>
                     {this.renderAvailableMeals()}
+                    </div>
                 </div>
             </div>
         )

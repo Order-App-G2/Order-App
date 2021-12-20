@@ -1,4 +1,5 @@
 export interface Meal {
+  id: number,
   title: string, 
   content: string, 
   price: number, 

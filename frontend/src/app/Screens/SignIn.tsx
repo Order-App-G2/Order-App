@@ -91,6 +91,7 @@ export class SignIn extends Component<SignInProps, SignInState> {
             <div id="SignInForm">
                 {!this.props.isLogedIn && this.returnFormLogIn()}
                 {this.props.isLogedIn && <FormHeader title="You are already loged In" />}
+                {this.props.isLogedIn && <Navigate replace to={{ pathname: '/' }}/>}
             </div>
 
         )
