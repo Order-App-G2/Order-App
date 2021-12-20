@@ -1,6 +1,13 @@
 import classes from './CartItem.module.css';
 
-const CartItem = (props: any) => {
+export interface CardItemProps {
+  name: string;
+  price: number;
+  amount: number;
+  onRemove?: () => void;
+  onAdd?: ()=> void;
+}
+const CartItem = (props: CardItemProps) => {
   const price = `$${props.price.toFixed(2)}`;
 
   return (
@@ -13,8 +20,8 @@ const CartItem = (props: any) => {
         </div>
       </div>
       <div className={classes.actions}>
-        <button onClick={props.onRemove}>−</button>
-        <button onClick={props.onAdd}>+</button>
+        {props.onRemove && <button onClick={props.onRemove}>−</button>}
+        {props.onAdd && <button onClick={props.onAdd}>+</button>}
       </div>
     </li>
   );

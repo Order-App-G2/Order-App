@@ -2,8 +2,10 @@ import React, { Component } from 'react'
 import CartIcon from '../../Components/Cart/CartIcon'
 import classes from './HeaderCartButton.module.css';
 
-
-export class HeaderCartButton extends Component {
+export interface HeaderCartButtonProps {
+  amount: number;
+}
+export class HeaderCartButton extends Component<HeaderCartButtonProps> {
     
 onClick = () => {
 
@@ -15,7 +17,7 @@ onClick = () => {
               <CartIcon />
             </span>
             <span>Your Cart</span>
-            <span className={classes.badge}>{8}</span>
+            <span className={classes.badge}>{this.props.amount}</span>
           </button>
         )
     }

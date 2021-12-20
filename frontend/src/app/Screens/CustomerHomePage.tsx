@@ -9,6 +9,8 @@ import { getProduct } from './../../redux/actions/userAction';
 import { Meal } from '../Interfaces';
 import MealItem from '../Meals/MealItem';
 import { Link } from 'react-router-dom';
+import Search from './Search';
+import {FormInput} from './SignIn' 
 
 interface CustomerHomePageProps {
     getProduct: () => any, 
@@ -16,22 +18,45 @@ interface CustomerHomePageProps {
 }
 
 interface CustomerHomePageState {
-
+    filteredProducts: Meal[],
 }
 
 
 export class CustomerHomePage extends Component<CustomerHomePageProps, CustomerHomePageState> {
 
+    constructor(props: CustomerHomePageProps) {
+        super(props);
+        this.state = {
+            filteredProducts: this.props.products
+        }
+    }
+
     componentDidMount() {
         this.props.getProduct()
     }
 
-    handleClickMeal = () => {
+    componen(prevProps: CustomerHomePageProps, prevState: CustomerHomePageState) {
+        if(this.props.products !== prevProps.products){
+            this.setState({ filteredProducts: prevProps.products })
+        }
+    }
 
+    handleSearchChange = (e: any) => {
+        const filterName = String(e.target.value);
+        if(!filterName || filterName.length <= 0){
+            this.setState({ filteredProducts: this.props.products });
+            return;
+        }
+        const _filteredProducts = this.props.products.filter((product)=>{
+            if(product.title.toLowerCase().includes(filterName)){
+                return product;
+            }
+        });
+        this.setState({ filteredProducts: _filteredProducts })
     }
 
     renderAvailableMeals = () => {
-        return this.props.products.map((meal: Meal) => {
+        return this.state.filteredProducts.map((meal: Meal) => {
             return (  <MealItem  id={meal.id} title={meal.title} price={meal.price} category={meal.category} content={meal.content} /> )
         });
     }
@@ -46,6 +71,8 @@ export class CustomerHomePage extends Component<CustomerHomePageProps, CustomerH
                 </div>
                 <div className={classes.homePage}>
                     <MealsSummary />
+                    {/* <Input   */}
+                    <FormInput description="search" placeholder="Search by restaurant" type="text"  onChange={this.handleSearchChange} />
                     <div className='wrapCard'>
                     {this.renderAvailableMeals()}
                     </div>

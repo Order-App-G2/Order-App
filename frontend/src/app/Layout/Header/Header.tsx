@@ -7,12 +7,13 @@ import classes from './Header.module.css';
 import { logout } from "../../../redux/actions/authAction"
 import logo from '../../../assets/logo2.png'
 import { connect } from "react-redux";
+import { Meal } from '../../Interfaces';
 
 interface HeaderProps {
   logOut: () => any,
   onShowCart: () => any,
-  isLogedIn: boolean
-
+  isLogedIn: boolean,
+  cardItems: Meal[],
 }
 
 interface HeaderState {
@@ -20,8 +21,8 @@ interface HeaderState {
 }
 
 export class Header extends Component<HeaderProps, HeaderState> {
-   
-  constructor(props:HeaderProps){
+
+  constructor(props: HeaderProps) {
     super(props);
 
     this.state = {
@@ -30,7 +31,7 @@ export class Header extends Component<HeaderProps, HeaderState> {
   }
 
   handleLogOut = () => {
-  this.props.logOut()
+    this.props.logOut()
     this.setState({
       isLogedIn: false
     })
@@ -48,7 +49,7 @@ export class Header extends Component<HeaderProps, HeaderState> {
               {!this.props.isLogedIn && <li> <Link to='/signIn'>Login</Link></li>}
               {this.props.isLogedIn && <li>  <Link to='/product'>Product</Link> </li>}
               {this.props.isLogedIn && <li onClick={this.handleLogOut}> <Link to='/'>Log out</Link> </li>}
-              {this.props.isLogedIn && <li> <HeaderCartButton /></li>}
+              {this.props.isLogedIn && <li> <Link to={{pathname: '/card'}}><HeaderCartButton amount={this.props.cardItems.length}/></Link></li>}
               {/* <li> <Link to="/Search">Search</Link></li> */}
             </ul>
           </nav>
@@ -60,7 +61,8 @@ export class Header extends Component<HeaderProps, HeaderState> {
 
 function mapStateToProps(state: any) {
   return {
-    isLogedIn: state.authReducer.isLoggedIn
+    isLogedIn: state.authReducer.isLoggedIn,
+    cardItems: state.userReducer.cardItems,
   };
 }
 

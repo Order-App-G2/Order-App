@@ -5,9 +5,12 @@ import {
     GET_CATEGORY_FAIL,
     GET_CATEGORY_SUCCESS,
     GET_FOOD_FAIL,
-    GET_FOOD_SUCCESS
+    GET_FOOD_SUCCESS,
+    ADD_TO_CARD_SUCESS,
+    REMOVE_FROM_CARD
 } from "../types";
 import UserService from "../../services/user.service"
+import { Meal } from "../../app/Interfaces";
 
 export const createProduct = (title: string, content: string, price: number, category_id: number) => (dispatch: any) => {
     return UserService.createProduct(title, content, price, category_id)
@@ -77,4 +80,13 @@ export const getProduct = () => (dispatch: any) => {
             return Promise.resolve();
 
         })
+}
+
+export const addToCard = (meal: Meal) => (dispatch: any) => {
+    return dispatch({ type: ADD_TO_CARD_SUCESS, payload: meal });
+}
+
+
+export const removeFromCard = (index: number) => (dispatch: any) => {
+    return dispatch({ type: REMOVE_FROM_CARD, payload: index });
 }

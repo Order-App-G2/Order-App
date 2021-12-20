@@ -5,12 +5,15 @@ import {
     GET_CATEGORY_FAIL,
     GET_FOOD_FAIL,
     GET_FOOD_SUCCESS,
+    ADD_TO_CARD_SUCESS,
+    REMOVE_FROM_CARD,
 } from "../types";
 
 const initialState = {
     isCreateProduct: false,
     foodCategory: [], 
-    allProducts: []
+    allProducts: [],
+    cardItems: []
 }
 
 
@@ -46,6 +49,18 @@ export default function (state = initialState, action: any) {
             return {
                 ...state,
             }
+            case ADD_TO_CARD_SUCESS:
+                return {
+                    ...state,
+                    cardItems: [...state.cardItems, payload]
+                }
+            case REMOVE_FROM_CARD:
+                const newCardItems = [...state.cardItems]
+                newCardItems.splice(payload, 1); 
+                return {
+                    ...state,
+                    cardItems: [...newCardItems]
+                }
         default:
             return state;
     }
