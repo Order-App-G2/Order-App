@@ -15,6 +15,17 @@
   .description {
     font-style: italic;
   }
+
+  .add{
+    font: inherit;
+    cursor: pointer;
+    background-color: #8a2b06;
+    border: 1px solid #8a2b06;
+    color: rgb(255, 255, 255);
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-weight: bold;
+  }
   .long_description
   {
     margin-top: 0.25rem;

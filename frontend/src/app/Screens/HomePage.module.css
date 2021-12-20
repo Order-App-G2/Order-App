@@ -16,6 +16,11 @@
   justify-content: center;
   display: flex;
   flex-direction: column;
+  align-items: center;
+ }
+
+ .homePageWrapper {
+  /* background-color: rgb(125, 83, 49, 0.6); */
  }
  
 
@@ -23,7 +28,6 @@
     position: absolute;
     top: 50%;
     left: 50%;
-    /* transform: translate(-50%, -50%); */
   }
 
  .container {

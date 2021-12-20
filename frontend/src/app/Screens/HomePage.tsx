@@ -35,6 +35,9 @@ export class HomePage extends Component<HomePageProps, HomePageState> {
     }
 
     renderHome = () => {
+        if(!this.props.isLogedIn) {
+            return <CustomerHomePage />;
+        }
         switch (this.props.userType) {
             case 'customer':
                 return  this.props.isLogedIn && <CustomerHomePage />;
@@ -43,13 +46,15 @@ export class HomePage extends Component<HomePageProps, HomePageState> {
             case 'courier':
                 return this.props.isLogedIn && <CourierHomePage />
             default:
-                return <Navigate replace to='signIn' />;
+                return <CustomerHomePage />;
         }
     }
 
     render() {
         return (
-            this.renderHome()
+            <div className={classes.homePageWrapper}>
+           { this.renderHome()}
+            </div>
         )
     }
 }
