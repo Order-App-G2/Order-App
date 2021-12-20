@@ -497,7 +497,9 @@ def get_all_products():
     for product in products:
         product_data = {'title': product.title,
                         'content': product.content,
-                        'price': product.price}
+                        'price': product.price,
+                        'partner_id': product.partner_id,
+                        'product_id': product.id}
         output.append(product_data)
 
     return jsonify({'products': output})
