@@ -15,3 +15,7 @@ export const GET_FOOD_FAIL = "GET_FOOD_FAIL";
 
 export const SET_MESSAGE = "SET_MESSAGE";
 export const CLEAR_MESSAGE = "CLEAR_MESSAGE";
+
+export const ADD_TO_CARD_SUCESS = "ADD_TO_CARD_SUCCESS";
+export const ADD_TO_CARD_FAIL = "ADD_TO_CARD_FAIL";
+export const REMOVE_FROM_CARD = "REMOVE_FROM_CARD";

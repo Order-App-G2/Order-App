@@ -5,16 +5,29 @@ import classes from './MealItem.module.css';
 import { Meal } from '../Interfaces';
 import Card from '../Components/Card/Card';
 import { connect } from "react-redux";
+import { addToCard } from '../../redux/actions/userAction';
 
 
 export interface MealItemsProps extends Meal {
     onClick?: () => void;
-    isLogedIn: boolean
+    isLogedIn: boolean;
+    addToCard: (meal: Meal) => any;
 }
 const MealItem = (props: MealItemsProps) => {
 
     if (props == undefined || props == null) {
         return <p>Loading...</p>
+    }
+
+    const handleAddToCard = () => {
+        const meal: Meal = {
+            category: props.category,
+            content: props.content,
+            id: props.id,
+            price: props.price,
+            title: props.title,
+        }
+        props.addToCard(meal);
     }
 
     let price = `$${props.price.toFixed(2)}`;
@@ -28,7 +41,7 @@ const MealItem = (props: MealItemsProps) => {
                         <div className={classes.long_description}>{props.content}</div>
                         <div>{price}</div>
                     </div>
-                  {props.isLogedIn && <div className='buttons'><button className={classes.add}>+ Add</button></div>}
+                  {props.isLogedIn && <div className='buttons'><button onClick={handleAddToCard} className={classes.add}>+ Add</button></div>}
                 </div>
         </li>
                 </Card >
@@ -43,7 +56,7 @@ function mapStateToProps(state: any) {
 }
 function mapDispatchToProps(dispatch: any) {
     return {
-
+        addToCard: (meal: Meal) => dispatch(addToCard(meal))
     }
 }
 
