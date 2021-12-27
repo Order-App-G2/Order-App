@@ -1,0 +1,45 @@
+.CardItems{
+  display: flex;
+  flex-direction: column;
+  /* justify-content: center; */
+  align-items: center;
+}
+
+.button {
+  font: inherit;
+  cursor: pointer;
+  background-color: #8a2b06;
+  border: 1px solid #8a2b06;
+  color: rgb(255, 255, 255);
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-weight: bold;
+}
+
+.Card{
+  width: 100%;
+    align-items: center;
+    display: contents;
+}
+
+#submit{
+  margin-right: 10px;
+}
+
+#cancel{
+  margin-left: 10px;
+}
+
+.cardItems{
+  display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.items{
+  width: 30%;
+    margin-top: 10%;
+    border-radius: 16px;
+    padding: 0px 40px 0px 40px;
+    background: white;
+}

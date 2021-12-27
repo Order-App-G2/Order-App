@@ -7,13 +7,19 @@ import {
     GET_FOOD_SUCCESS,
     ADD_TO_CARD_SUCESS,
     REMOVE_FROM_CARD,
+    CREATE_ORDER_FAIL,
+    CREATE_ORDER_SUCCESS,
+    GET_PARTNER_FOOD_SUCCESS,
+    GET_PARTNER_FOOD_FAIL
 } from "../types";
 
 const initialState = {
     isCreateProduct: false,
-    foodCategory: [], 
+    isCreateOrder: false,
+    foodCategory: [],
     allProducts: [],
-    cardItems: []
+    cardItems: [],
+    partnerProducts: []
 }
 
 
@@ -31,36 +37,55 @@ export default function (state = initialState, action: any) {
                 ...state,
                 isCreateProduct: false
             }
+        case CREATE_ORDER_SUCCESS:
+            return {
+                ...state,
+                isCreateOrder: true
+            }
+        case CREATE_ORDER_FAIL:
+            return {
+                ...state,
+                isCreateOrder: false
+            }
         case GET_CATEGORY_SUCCESS:
             return {
                 ...state,
                 foodCategory: payload.categories
             }
-            case GET_CATEGORY_FAIL:
-                return {
-                    ...state,
-                }
-            case GET_FOOD_SUCCESS:
+        case GET_CATEGORY_FAIL:
+            return {
+                ...state,
+            }
+        case GET_FOOD_SUCCESS:
             return {
                 ...state,
                 allProducts: payload.products
             }
-            case GET_FOOD_FAIL:
+        case GET_FOOD_FAIL:
             return {
                 ...state,
             }
-            case ADD_TO_CARD_SUCESS:
+            case GET_PARTNER_FOOD_SUCCESS:
                 return {
                     ...state,
-                    cardItems: [...state.cardItems, payload]
+                    partnerProducts: payload.products
                 }
-            case REMOVE_FROM_CARD:
-                const newCardItems = [...state.cardItems]
-                newCardItems.splice(payload, 1); 
+            case GET_PARTNER_FOOD_FAIL:
                 return {
                     ...state,
-                    cardItems: [...newCardItems]
                 }
+        case ADD_TO_CARD_SUCESS:
+            return {
+                ...state,
+                cardItems: [...state.cardItems, payload]
+            }
+        case REMOVE_FROM_CARD:
+            const newCardItems = [...state.cardItems]
+            newCardItems.splice(payload, 1);
+            return {
+                ...state,
+                cardItems: [...newCardItems]
+            }
         default:
             return state;
     }

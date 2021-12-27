@@ -3,6 +3,11 @@ import authHeader from "./authHeader";
 
 const API_URL = "http://localhost:5000";
 
+export interface orderProduct {
+    product_id: number, 
+    quantity: number 
+}
+
 class UserService {
     getProducts() {
         return axios.get(API_URL + '/home');
@@ -24,8 +29,25 @@ class UserService {
             "Content-Type": "application/json"
         }
 
-
         return axios.post(API_URL + '/addProduct', product, { headers: header as AxiosRequestHeaders })
+    }
+
+    createOrder(partner_id: number , orders: orderProduct[]) {
+        const order = {
+            "partner_id": partner_id,
+            "products": orders
+        }
+
+        const token = JSON.parse(localStorage.getItem("user") as string);
+
+        const header = {
+            "Authorization": `Bearer ${token.token}`,
+            "token": token.token,
+            "Content-Type": "application/json"
+        }
+
+        return axios.post(API_URL + '/makeOrder', order, { headers: header as AxiosRequestHeaders })
+   
     }
 
     getAllCategory() {
@@ -33,6 +55,9 @@ class UserService {
             .then((res) => {
                 return res
             })
+    }
+    getPartnerProducts(){
+        return axios.get(API_URL + '/ownerProducts/<string:public_id>')
     }
 
     getCustomers() {

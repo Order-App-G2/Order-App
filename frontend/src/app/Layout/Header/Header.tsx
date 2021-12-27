@@ -7,13 +7,13 @@ import classes from './Header.module.css';
 import { logout } from "../../../redux/actions/authAction"
 import logo from '../../../assets/logo2.png'
 import { connect } from "react-redux";
-import { Meal } from '../../Interfaces';
 
 interface HeaderProps {
   logOut: () => any,
   onShowCart: () => any,
   isLogedIn: boolean,
-  cardItems: Meal[],
+  cardItems: any[],
+  userType:string
 }
 
 interface HeaderState {
@@ -47,10 +47,9 @@ export class Header extends Component<HeaderProps, HeaderState> {
             <ul>
               <li><Link to='/'>Home</Link></li>
               {!this.props.isLogedIn && <li> <Link to='/signIn'>Login</Link></li>}
-              {this.props.isLogedIn && <li>  <Link to='/product'>Product</Link> </li>}
               {this.props.isLogedIn && <li onClick={this.handleLogOut}> <Link to='/'>Log out</Link> </li>}
-              {this.props.isLogedIn && <li> <Link to={{pathname: '/card'}}><HeaderCartButton amount={this.props.cardItems.length}/></Link></li>}
-              {/* <li> <Link to="/Search">Search</Link></li> */}
+              {this.props.isLogedIn &&  this.props.userType === 'customer' && <li> <Link to={{pathname: '/card'}}><HeaderCartButton amount={this.props.cardItems.length}/></Link></li>}
+              {this.props.isLogedIn && this.props.userType === 'partner' && <li> <Link to={{pathname:'/myProducts'}}>My products</Link></li>}
             </ul>
           </nav>
         </header>
@@ -63,6 +62,7 @@ function mapStateToProps(state: any) {
   return {
     isLogedIn: state.authReducer.isLoggedIn,
     cardItems: state.userReducer.cardItems,
+    userType: state.authReducer.type
   };
 }
 

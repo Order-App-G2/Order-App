@@ -6,7 +6,6 @@ import MealsSummary from '../Meals/MealsSummary';
 import Modal from '../Components/Modal/Modal';
 import './CustomerHomePage.css'
 import { getProduct } from './../../redux/actions/userAction';
-import { Meal } from '../Interfaces';
 import MealItem from '../Meals/MealItem';
 import { Link } from 'react-router-dom';
 import Search from './Search';
@@ -14,11 +13,11 @@ import {FormInput} from './SignIn'
 
 interface CustomerHomePageProps {
     getProduct: () => any, 
-    products: Meal[]
+    products: any[]
 }
 
 interface CustomerHomePageState {
-    filteredProducts: Meal[],
+    filteredProducts: any[],
 }
 
 
@@ -41,6 +40,7 @@ export class CustomerHomePage extends Component<CustomerHomePageProps, CustomerH
         }
     }
 
+    
     handleSearchChange = (e: any) => {
         const filterName = String(e.target.value);
         if(!filterName || filterName.length <= 0){
@@ -56,8 +56,8 @@ export class CustomerHomePage extends Component<CustomerHomePageProps, CustomerH
     }
 
     renderAvailableMeals = () => {
-        return this.state.filteredProducts.map((meal: Meal) => {
-            return (  <MealItem  id={meal.id} title={meal.title} price={meal.price} category={meal.category} content={meal.content} /> )
+        return this.state.filteredProducts.map((meal: any) => {
+            return (  <MealItem partnerId={meal.partner_id} product_id={meal.product_id} title={meal.title} price={meal.price} category={meal.category} content={meal.content} /> )
         });
     }
 

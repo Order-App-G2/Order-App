@@ -1,14 +1,6 @@
 import React, { Component } from 'react'
 import classes from './HomePage.module.css';
-import mealsImage from '../../assets/meals.jpg'
-import MealsSummary from '../Meals/MealsSummary';
-import Modal from '../Components/Modal/Modal';
-import Card from '../Components/Card/Card'
-// import Meals from '../Meals/Meals';
-import { AvailableMeals } from '../Interfaces';
 import { connect } from "react-redux";
-import MealItem from '../Meals/MealItem';
-import { Navigate } from 'react-router'
 import CustomerHomePage from './CustomerHomePage';
 import  AddProduct  from './AddProduct';
 import CourierHomePage from './CourierHomePage';
