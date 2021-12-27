@@ -6,11 +6,14 @@ import {
     GET_CATEGORY_SUCCESS,
     GET_FOOD_FAIL,
     GET_FOOD_SUCCESS,
+    GET_PARTNER_FOOD_SUCCESS,
+    GET_PARTNER_FOOD_FAIL,
     ADD_TO_CARD_SUCESS,
-    REMOVE_FROM_CARD
+    REMOVE_FROM_CARD,
+    CREATE_ORDER_SUCCESS, 
+    CREATE_ORDER_FAIL
 } from "../types";
-import UserService from "../../services/user.service"
-import { Meal } from "../../app/Interfaces";
+import UserService, { orderProduct } from "../../services/user.service"
 
 export const createProduct = (title: string, content: string, price: number, category_id: number) => (dispatch: any) => {
     return UserService.createProduct(title, content, price, category_id)
@@ -35,6 +38,41 @@ export const createProduct = (title: string, content: string, price: number, cat
 
                 dispatch({
                     type: CREATE_PRODUCT_FAIL,
+                });
+
+                dispatch({
+                    type: SET_MESSAGE,
+                    payload: message,
+                });
+
+                return Promise.reject();
+            }
+        )
+}
+
+export const createOrder = (partner_id: number , orders: orderProduct[]) => (dispatch: any) => {
+    return UserService.createOrder(partner_id, orders)
+        .then((response) => {
+            dispatch({
+                type: CREATE_ORDER_SUCCESS
+            })
+            dispatch({
+                type: CREATE_ORDER_FAIL,
+                payload: response.data.message
+            })
+            return Promise.resolve();
+        },
+            (error) => {
+                const message =
+                    (error.response &&
+                        error.response.data &&
+
+                        error.response.data.message) ||
+                    error.message ||
+                    error.toString();
+
+                dispatch({
+                    type: CREATE_ORDER_FAIL,
                 });
 
                 dispatch({
@@ -82,7 +120,24 @@ export const getProduct = () => (dispatch: any) => {
         })
 }
 
-export const addToCard = (meal: Meal) => (dispatch: any) => {
+export const getPartnerProducts = () => (dispatch: any) => {
+    return UserService.getPartnerProducts()
+    .then((response) => {
+        dispatch({
+            type: GET_PARTNER_FOOD_SUCCESS, 
+            payload: response.data
+        })
+        dispatch({
+            type: GET_PARTNER_FOOD_FAIL,
+            payload: response.data.message            
+        })
+
+        return Promise.resolve();
+
+    })
+}
+
+export const addToCard = (meal: any) => (dispatch: any) => {
     return dispatch({ type: ADD_TO_CARD_SUCESS, payload: meal });
 }
 

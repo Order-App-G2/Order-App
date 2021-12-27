@@ -119,8 +119,8 @@ export const registerCourier = (username: any, password: any, email: any) => (di
 
 
 
-export const login = (username: any, password: any) => (dispatch: any) => {
-    return AuthService.login(username, password).then(
+export const login = (username: any, password: any, reCaptchaToken: any) => (dispatch: any) => {
+    return AuthService.login(username, password, reCaptchaToken).then(
         (data) => {
             dispatch({
                 type: LOGIN_SUCCESS,

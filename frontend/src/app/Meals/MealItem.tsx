@@ -2,16 +2,21 @@ import { useContext } from 'react';
 
 import classes from './MealItem.module.css';
 // import MealItemForm from './MealsItemForm';
-import { Meal } from '../Interfaces';
 import Card from '../Components/Card/Card';
 import { connect } from "react-redux";
 import { addToCard } from '../../redux/actions/userAction';
 
 
-export interface MealItemsProps extends Meal {
+export interface MealItemsProps {
     onClick?: () => void;
     isLogedIn: boolean;
-    addToCard: (meal: Meal) => any;
+    addToCard: (meal: any) => any;
+    category: string , 
+    partnerId: number , 
+    title: string ,
+    price: number, 
+    product_id: number , 
+    content: string
 }
 const MealItem = (props: MealItemsProps) => {
 
@@ -20,12 +25,13 @@ const MealItem = (props: MealItemsProps) => {
     }
 
     const handleAddToCard = () => {
-        const meal: Meal = {
+        const meal: any = {
             category: props.category,
             content: props.content,
-            id: props.id,
+            product_id: props.product_id,
             price: props.price,
             title: props.title,
+            partner_id: props.partnerId,
         }
         props.addToCard(meal);
     }
@@ -56,7 +62,7 @@ function mapStateToProps(state: any) {
 }
 function mapDispatchToProps(dispatch: any) {
     return {
-        addToCard: (meal: Meal) => dispatch(addToCard(meal))
+        addToCard: (meal: any) => dispatch(addToCard(meal))
     }
 }
 

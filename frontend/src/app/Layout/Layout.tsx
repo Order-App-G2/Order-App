@@ -1,6 +1,5 @@
 import {Fragment, useState } from 'react';
 import './Layout.css'
-import {Cart} from '../Components/Cart/Cart'
 import Header from './Header/Header'
 const Layout = (props: any) => {
     const [cartIsShown, setCartIsShown] = useState(false);

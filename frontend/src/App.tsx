@@ -1,6 +1,5 @@
 import './App.css';
 import {
-  BrowserRouter,
   Routes,
   Route
 } from "react-router-dom";
@@ -8,12 +7,10 @@ import SignIn from './app/Screens/SignIn';
 import SignUp from './app/Screens/SignUp';
 import HomePage from './app/Screens/HomePage';
 import Layout from './app/Layout/Layout';
-import { Navigate } from 'react-router-dom';
-// import Mealsdetails from './app/Meals/Mealsdetails';
-import ProductsPage from './app/Screens/ProductsPage';
 import AddProduct from './app/Screens/AddProduct';
 import Search from './app/Screens/Search';
 import CardPage from './app/Screens/CardPage';
+import PartnerProductList from './app/Screens/PartnerProductList';
 
 
 function App() {
@@ -24,9 +21,8 @@ function App() {
         <Route path="/signIn" element={<SignIn />} />
         <Route path="/signUp" element={<SignUp />} />
         <Route path="/addProduct" element={<AddProduct />} ></Route>
-        <Route path="/product" element={<ProductsPage />} />
+        <Route path="/myProducts" element={<PartnerProductList />} />
         <Route path="/card" element={<CardPage />} >
-        {/* <Route path="/products/:productId" element={<Mealsdetails />} /> */}
         </Route>
         <Route path="/Search"  element={<Search/>}/>
       </Routes>

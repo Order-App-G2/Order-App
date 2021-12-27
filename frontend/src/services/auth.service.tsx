@@ -11,10 +11,11 @@ interface User {
 
 
 class AuthService {
-    login(username: any, password: any) {
+    login(username: any, password: any, reCaptchaToken: any) {
         const user = {
             username,
-            password
+            password,
+            token: reCaptchaToken
         }
         const token = btoa(`${username}:${password}`)
 

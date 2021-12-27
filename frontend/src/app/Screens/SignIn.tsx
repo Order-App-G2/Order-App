@@ -1,12 +1,14 @@
 import React, { Component } from 'react'
 import './SignIn.css'
+import ReCAPTCHA from "react-google-recaptcha";
 import { Link, Navigate, NavLink } from 'react-router-dom';
-// import { Navigate } from 'react-router-dom';
 import { connect } from "react-redux";
 import { login } from '../../redux/actions/authAction';
 
+const SITE_KEY = '6LcHrMwdAAAAAFKVQ5pBwMZx28GPNN7oJue2i05s'
+
 interface SignInProps {
-    login: (username: any, password: any) => any,
+    login: (username: any, password: any, reCaptchaToken: any) => any,
     isLogedIn: boolean
 }
 
@@ -16,7 +18,8 @@ interface SignInState {
     error: boolean,
     success: boolean,
     userName: string,
-    password: string
+    password: string,
+    reCaptchaToken: string | null
 }
 
 export const FormHeader = (props: any) => (
@@ -51,6 +54,7 @@ export class SignIn extends Component<SignInProps, SignInState> {
             success: false,
             userName: '',
             password: '',
+            reCaptchaToken: ''
         }
     }
 
@@ -62,7 +66,7 @@ export class SignIn extends Component<SignInProps, SignInState> {
             success: false,
         });
 
-        this.props.login(this.state.userName, this.state.password)
+        this.props.login(this.state.userName, this.state.password, this.state.reCaptchaToken)
             .then(() => {
                 this.setState({
                     success: true,
@@ -73,17 +77,25 @@ export class SignIn extends Component<SignInProps, SignInState> {
                     success: false,
                 });
             });
-      
+
     };
 
+    handleRecaptchaChange = (token: string | null) => {
+        this.setState({
+            reCaptchaToken: token
+        })
+    }
+
+
     returnFormLogIn = () => {
-        return (<div>
+        return (<>
             <FormHeader title="Log in to your account" />
             <FormInput description="Username" placeholder="Enter your username" type="text" onChange={(e: any) => { this.setState({ userName: e.target.value }) }} />
             <FormInput description="Password" placeholder="Enter your password" type="password" onChange={(e: any) => { this.setState({ password: e.target.value }) }} />
+            <div className='reCaptcha'> <ReCAPTCHA onChange={this.handleRecaptchaChange} size="normal" sitekey={SITE_KEY} /> </div>
             <FormButton title="Log in" onClick={this.submitHandler} />
             <p className='redirectToSignUp'>Need an account ? <Link to={{ pathname: '/signUp' }} className='signUp'> Sign up</Link></p>
-        </div>)
+        </>)
     }
 
     render() {
@@ -91,7 +103,7 @@ export class SignIn extends Component<SignInProps, SignInState> {
             <div id="SignInForm">
                 {!this.props.isLogedIn && this.returnFormLogIn()}
                 {this.props.isLogedIn && <FormHeader title="You are already loged In" />}
-                {this.props.isLogedIn && <Navigate replace to={{ pathname: '/' }}/>}
+                {this.props.isLogedIn && <Navigate replace to={{ pathname: '/' }} />}
             </div>
 
         )
@@ -105,7 +117,7 @@ function mapStateToProps(state: any) {
 
 function mapDispatchToProps(dispatch: any) {
     return {
-        login: (username: any, password: any) => dispatch(login(username, password)),
+        login: (username: any, password: any, reCaptchaToken: any) => dispatch(login(username, password, reCaptchaToken)),
     }
 }
 export default connect(mapStateToProps, mapDispatchToProps)(SignIn)
