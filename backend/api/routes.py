@@ -280,14 +280,11 @@ def change_availability(current_user):
 @token_required
 def get_one_user(current_user):
     if type(current_user) == Customer:
-
         return jsonify({'usertype': 'customer'})
 
     if type(current_user) == Courier:
-
         return jsonify({'usertype': 'courier'})
     if type(current_user) == Partner:
-
         return jsonify({'usertype': 'partner'})
 
 
@@ -628,9 +625,9 @@ def order_products(current_user):
 
     db.session.commit()
     return jsonify({'Order':
-                    {'order id': new_order.id,
-                     'customer': current_user.public_id,
-                     'partner id': partner_id}})
+                        {'order id': new_order.id,
+                         'customer': current_user.public_id,
+                         'partner id': partner_id}})
 
 
 @app.route('/addCategory', methods=['POST'])
@@ -655,7 +652,6 @@ def add_new_category(current_user):
 @app.route('/orderInformation', methods=['GET'])
 @token_required
 def check_order_information(current_user):
-
     if type(current_user) != Customer:
         return jsonify({'message': 'Cannot perform that function '})
 
@@ -679,7 +675,6 @@ def check_order_information(current_user):
 @app.route('/updateOrderStatus/<int:order_id>/<int:status>', methods=['PUT'])
 @token_required
 def update_order_status(current_user, order_id, status):
-
     if type(current_user) == Customer:
         return jsonify({'message': 'Can not perform that action'})
 
@@ -723,7 +718,6 @@ def update_order_status(current_user, order_id, status):
 @app.route('/updateOrderCourier/<int:order_id>', methods=['PUT'])
 @token_required
 def update_order_courier(current_user, order_id):
-
     if type(current_user) != Partner:
         return jsonify({'message': 'Cannot perform that action'})
 
@@ -750,7 +744,6 @@ def update_order_courier(current_user, order_id):
 
 @app.route('/getAllCategories', methods=['GET'])
 def get_all_categories():
-
     categories = Category.query.all()
 
     output = []
