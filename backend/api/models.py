@@ -87,7 +87,7 @@ class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     order_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     Order_status = db.Column(db.Integer, db.ForeignKey('status.id'), nullable=False, default=1)
-    Partner_id = db.Column(db.Integer, db.ForeignKey('partner.id'), nullable=False, default=1)
+    Partner_id = db.Column(db.String(255), db.ForeignKey('partner.public_id'), nullable=False, default=1)
     customer_id = db.Column(db.String(255), db.ForeignKey('customer.public_id'), nullable=False)
     courier = db.Column(db.Integer, db.ForeignKey('courier.id'), nullable=True)
 
