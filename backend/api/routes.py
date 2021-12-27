@@ -750,4 +750,5 @@ def get_all_categories():
 
         output.append(product_data)
 
+
     return jsonify({'categories': output})
