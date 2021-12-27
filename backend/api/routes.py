@@ -2,10 +2,12 @@ import uuid
 from datetime import datetime, timedelta
 import jwt
 from api import app
+from api import RECAPTCHA_SECRET_KEY
 from api.models import *
 from flask import request, jsonify, make_response
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
+import requests
 
 
 def token_required(f):
@@ -30,19 +32,28 @@ def token_required(f):
 
     return decorated
 
-
-@app.route('/')
-def hello():
-    return jsonify({'hello': 'world'})
+def verify_recaptcha(token):
+    recaptcha_url = 'https://www.google.com/recaptcha/api/siteverify'
+    payload = {
+        'secret': RECAPTCHA_SECRET_KEY,
+        'response': token,
+        'remoteip': request.remote_addr,
+    }
+    response = requests.post(recaptcha_url, data=payload)
+    result = response.json()
+    return result.get('success', False)
 
 
 @app.route('/login', methods=['POST'])
 def login():
     auth = request.authorization
-
-    if not auth or not auth.username or not auth.password:
+    data = request.get_json()
+    token = data['token']
+    if not token:
+        return make_response('Not reCaptcha token', 401)
+    token_valid = verify_recaptcha(token)
+    if not auth or not auth.username or not auth.password or not token_valid:
         return make_response('Not verified', 401, {'WWW-Authenticate': ' Basic realm="Login required!" '})
-
     user = Customer.query.filter_by(username=auth.username).first() or Partner.query.filter_by(
         username=auth.username).first() or Courier.query.filter_by(username=auth.username).first()
 
@@ -69,8 +80,6 @@ def create_customer():
            email: <email:string>,
            phoneNumber: <phone_number:string>,
            address: <address:string>,
-
-
        }
        :return:
        'customer id': new_customer.public_id,
@@ -113,8 +122,6 @@ def create_partner():
                username: <username:string>,
                password: <password:string>,
                email: <email:string>,
-
-
            }
            :return:
            'partner id': new_user.public_id,
@@ -157,8 +164,6 @@ def create_courier():
                    username: <username:string>,
                    password: <password:string>,
                    email: <email:string>,
-
-
                }
                :return:
                'courier id': new_courier.public_id,
@@ -194,7 +199,6 @@ def create_courier():
 @app.route('/customer', methods=['GET'])
 def get_all_users():
     """
-
                    :return:
                     'customer id': customer.public_id,
                     'email': customer.email,
@@ -251,11 +255,7 @@ def get_all_available_couriers(current_user):
 def change_availability(current_user):
     """
                   The body structure is as follows:
-
                     required login
-
-
-
                   :return:
                   'courier': courier.username,
                                'available': new_courier.available
@@ -281,14 +281,14 @@ def change_availability(current_user):
 def get_one_user(current_user):
     if type(current_user) == Customer:
 
-        return jsonify({'user type': 'customer'})
+        return jsonify({'usertype': 'customer'})
 
     if type(current_user) == Courier:
 
-        return jsonify({'user type': 'courier'})
+        return jsonify({'usertype': 'courier'})
     if type(current_user) == Partner:
 
-        return jsonify({'user type': 'partner'})
+        return jsonify({'usertype': 'partner'})
 
 
 # delete user
@@ -297,11 +297,7 @@ def get_one_user(current_user):
 def delete_user(current_user):
     """
                      The body structure is as follows:
-
                        required login
-
-
-
                      :return:
                      'user': user.username,
                                   'message': user deleted
@@ -331,8 +327,6 @@ def edit_user(current_user):
                username: <username:string>,
                password: <password:string>,
                email: <email:string>,
-
-
            }
            :return:
            'user id': user.public_id,
@@ -432,9 +426,7 @@ def edit_product(current_user, id):
              content: <content>,
              price: <int:price>,
              category: <int:category>,
-
          }
-
          :return:
          'product': product.title,
          'content': product.content,
@@ -497,7 +489,9 @@ def get_all_products():
     for product in products:
         product_data = {'title': product.title,
                         'content': product.content,
-                        'price': product.price}
+                        'price': product.price,
+                        'partner_id': product.partner_id,
+                        'product_id': product.id}
         output.append(product_data)
 
     return jsonify({'products': output})
@@ -514,10 +508,8 @@ def new_product(current_user):
          content: <content>,
          price: <int:price>,
          category: <int:category>,
-
      }
      :return:
-
      'product': new_order.id,
      'customer': current_user.public_id,
      'partner id': partner_id
@@ -629,3 +621,133 @@ def order_products(current_user):
                     {'order id': new_order.id,
                      'customer': current_user.public_id,
                      'partner id': partner_id}})
+
+
+@app.route('/addCategory', methods=['POST'])
+@token_required
+def add_new_category(current_user):
+    if type(current_user) != Partner:
+        return jsonify({'message': 'Cannot perform that function '})
+
+    data = request.get_json()
+    category_name = data['category_name']
+    new_category = Category(name=category_name)
+    if Category.query.filter_by(name=category_name).first():
+        return jsonify({'message': 'category is already exists '}), 400
+    else:
+        db.session.add(new_category)
+        db.session.commit()
+
+        return jsonify({'category': new_category.name,
+                        'message': 'has been added'})
+
+
+@app.route('/orderInformation', methods=['GET'])
+@token_required
+def check_order_information(current_user):
+
+    if type(current_user) != Customer:
+        return jsonify({'message': 'Cannot perform that function '})
+
+    q = db.session.query(
+        Order.id,
+        Order.order_date,
+        Status.order_status).filter(Order.customer_id == current_user.public_id).all()
+
+    output = []
+    for order in q:
+        user_data = {
+            'order_date': order.order_date,
+            'order_id': order.id,
+            'order_status': order.order_status
+        }
+
+        output.append(user_data)
+    return jsonify({'order': output})
+
+
+@app.route('/updateOrderStatus/<int:order_id>/<int:status>', methods=['PUT'])
+@token_required
+def update_order_status(current_user, order_id, status):
+
+    if type(current_user) == Customer:
+        return jsonify({'message': 'Can not perform that action'})
+
+    order = Order.query.filter_by(id=order_id).first()
+    courier = Courier.query.filter_by(id=order.courier).first()
+
+    if not order:
+        return jsonify({'message': 'No order matches id'})
+
+    if (status != 1) & (status != 2) & (status != 3) & (status != 4) & (status != 5):
+        return jsonify({'message': 'Invalid status number'})
+
+    if order.Partner_id != current_user.id:
+        return jsonify({'message': 'Order does not match partner'})
+
+    if (type(current_user) == Partner) & (order.Partner_id == current_user.id):
+        if status == 4:
+            return jsonify({'message': 'Cannot perform that function'})
+
+        order.Order_status = status
+
+        db.session.commit()
+        return jsonify({'order_status': order.Order_status})
+
+    if not courier:
+        return jsonify({'message': 'Cannot perform that action because order does not have courier'})
+
+    if (type(current_user) == Courier) & (order.courier == current_user.id):
+        if (status != 4) & (status != 5):
+            return jsonify({'message': 'Cannot perform that function'})
+
+        order.Order_status = status
+
+        if order.Order_status == 5:
+            courier.available = True
+
+        db.session.commit()
+        return jsonify({'order_status': order.Order_status})
+
+
+@app.route('/updateOrderCourier/<int:order_id>', methods=['PUT'])
+@token_required
+def update_order_courier(current_user, order_id):
+
+    if type(current_user) != Partner:
+        return jsonify({'message': 'Cannot perform that action'})
+
+    order = Order.query.filter_by(id=order_id).first()
+    courier = Courier.query.filter_by(available=True).first()
+
+    if not order:
+        return jsonify({'message': 'No order matches id'})
+
+    if not courier:
+        return jsonify({'message': 'No available couriers at the moment'})
+
+    if order.courier:
+        return jsonify({'message': 'Order already has a courier assigned'})
+    else:
+        order.courier = courier.id
+        courier.available = False
+
+        db.session.commit()
+        return jsonify({'courier': courier.username,
+                        'message': 'has been assigned to order# ',
+                        'order_id': order.id})
+
+
+@app.route('/getAllCategories', methods=['GET'])
+def get_all_categories():
+
+    categories = Category.query.all()
+
+    output = []
+    for category in categories:
+        product_data = {'category_id': category.id,
+                        'category': category.name}
+
+        output.append(product_data)
+
+    return jsonify({'categories': output})

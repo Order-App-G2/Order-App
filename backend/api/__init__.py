@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_cors import CORS
 
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '0fed4204af728cc75af855673b710ce4'
 
@@ -18,5 +19,11 @@ cors = CORS(app, resource={
 })
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
+
+app.config['RECAPTCHA_ENABLED'] = True
+app.config['RECAPTCHA_SITE_KEY'] = '6LcHrMwdAAAAAFKVQ5pBwMZx28GPNN7oJue2i05s'
+app.config['RECAPTCHA_SECRET_KEY'] = '6LcHrMwdAAAAADkawlzMYvgM0WyhbmOVmmUO9CCI'
+
+RECAPTCHA_SECRET_KEY = '6LcHrMwdAAAAADkawlzMYvgM0WyhbmOVmmUO9CCI'
 
 from api import routes
