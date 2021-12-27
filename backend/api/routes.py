@@ -2,10 +2,12 @@ import uuid
 from datetime import datetime, timedelta
 import jwt
 from api import app
+from api import RECAPTCHA_SECRET_KEY
 from api.models import *
 from flask import request, jsonify, make_response
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
+import requests
 
 
 def token_required(f):
@@ -30,19 +32,28 @@ def token_required(f):
 
     return decorated
 
-
-@app.route('/')
-def hello():
-    return jsonify({'hello': 'world'})
+def verify_recaptcha(token):
+    recaptcha_url = 'https://www.google.com/recaptcha/api/siteverify'
+    payload = {
+        'secret': RECAPTCHA_SECRET_KEY,
+        'response': token,
+        'remoteip': request.remote_addr,
+    }
+    response = requests.post(recaptcha_url, data=payload)
+    result = response.json()
+    return result.get('success', False)
 
 
 @app.route('/login', methods=['POST'])
 def login():
     auth = request.authorization
-
-    if not auth or not auth.username or not auth.password:
+    data = request.get_json()
+    token = data['token']
+    if not token:
+        return make_response('Not reCaptcha token', 401)
+    token_valid = verify_recaptcha(token)
+    if not auth or not auth.username or not auth.password or not token_valid:
         return make_response('Not verified', 401, {'WWW-Authenticate': ' Basic realm="Login required!" '})
-
     user = Customer.query.filter_by(username=auth.username).first() or Partner.query.filter_by(
         username=auth.username).first() or Courier.query.filter_by(username=auth.username).first()
 
@@ -69,8 +80,6 @@ def create_customer():
            email: <email:string>,
            phoneNumber: <phone_number:string>,
            address: <address:string>,
-
-
        }
        :return:
        'customer id': new_customer.public_id,
@@ -113,8 +122,6 @@ def create_partner():
                username: <username:string>,
                password: <password:string>,
                email: <email:string>,
-
-
            }
            :return:
            'partner id': new_user.public_id,
@@ -157,8 +164,6 @@ def create_courier():
                    username: <username:string>,
                    password: <password:string>,
                    email: <email:string>,
-
-
                }
                :return:
                'courier id': new_courier.public_id,
@@ -194,7 +199,6 @@ def create_courier():
 @app.route('/customer', methods=['GET'])
 def get_all_users():
     """
-
                    :return:
                     'customer id': customer.public_id,
                     'email': customer.email,
@@ -251,11 +255,7 @@ def get_all_available_couriers(current_user):
 def change_availability(current_user):
     """
                   The body structure is as follows:
-
                     required login
-
-
-
                   :return:
                   'courier': courier.username,
                                'available': new_courier.available
@@ -297,11 +297,7 @@ def get_one_user(current_user):
 def delete_user(current_user):
     """
                      The body structure is as follows:
-
                        required login
-
-
-
                      :return:
                      'user': user.username,
                                   'message': user deleted
@@ -331,8 +327,6 @@ def edit_user(current_user):
                username: <username:string>,
                password: <password:string>,
                email: <email:string>,
-
-
            }
            :return:
            'user id': user.public_id,
@@ -432,9 +426,7 @@ def edit_product(current_user, id):
              content: <content>,
              price: <int:price>,
              category: <int:category>,
-
          }
-
          :return:
          'product': product.title,
          'content': product.content,
@@ -516,10 +508,8 @@ def new_product(current_user):
          content: <content>,
          price: <int:price>,
          category: <int:category>,
-
      }
      :return:
-
      'product': new_order.id,
      'customer': current_user.public_id,
      'partner id': partner_id
@@ -759,5 +749,6 @@ def get_all_categories():
                         'category': category.name}
 
         output.append(product_data)
+
 
     return jsonify({'categories': output})

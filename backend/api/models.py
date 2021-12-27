@@ -89,7 +89,7 @@ class Order(db.Model):
     Order_status = db.Column(db.Integer, db.ForeignKey('status.id'), nullable=False, default=1)
     Partner_id = db.Column(db.Integer, db.ForeignKey('partner.id'), nullable=False, default=1)
     customer_id = db.Column(db.String(255), db.ForeignKey('customer.public_id'), nullable=False)
-    courier = db.Column(db.Integer, db.ForeignKey('courier.id'))
+    courier = db.Column(db.Integer, db.ForeignKey('courier.id'), nullable=True)
 
     order_products_item = db.relationship('Order_products', backref='orders', lazy=True)
 
