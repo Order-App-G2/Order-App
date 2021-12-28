@@ -16,7 +16,10 @@ export interface MealItemsProps {
     title: string ,
     price: number, 
     product_id: number , 
-    content: string
+    content: string, 
+    showButton?: boolean,
+    deleteButton?: boolean,
+    handleDeleteButton?: () => any
 }
 const MealItem = (props: MealItemsProps) => {
 
@@ -47,7 +50,8 @@ const MealItem = (props: MealItemsProps) => {
                         <div className={classes.long_description}>{props.content}</div>
                         <div>{price}</div>
                     </div>
-                  {props.isLogedIn && <div className='buttons'><button onClick={handleAddToCard} className={classes.add}>+ Add</button></div>}
+                  {props.isLogedIn && !props.showButton &&<div className='buttons'><button onClick={handleAddToCard} className={classes.add}>+ Add</button></div>}
+                  {props.deleteButton && <div className='buttons'><button onClick={props.handleDeleteButton} className={classes.add}>Delete</button></div>}
                 </div>
         </li>
                 </Card >

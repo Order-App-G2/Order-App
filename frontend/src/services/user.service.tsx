@@ -4,8 +4,8 @@ import authHeader from "./authHeader";
 const API_URL = "http://localhost:5000";
 
 export interface orderProduct {
-    product_id: number, 
-    quantity: number 
+    product_id: number,
+    quantity: number
 }
 
 class UserService {
@@ -32,7 +32,7 @@ class UserService {
         return axios.post(API_URL + '/addProduct', product, { headers: header as AxiosRequestHeaders })
     }
 
-    createOrder(partner_id: number , orders: orderProduct[]) {
+    createOrder(partner_id: number, orders: orderProduct[]) {
         const order = {
             "partner_id": partner_id,
             "products": orders
@@ -47,7 +47,7 @@ class UserService {
         }
 
         return axios.post(API_URL + '/makeOrder', order, { headers: header as AxiosRequestHeaders })
-   
+
     }
 
     getAllCategory() {
@@ -56,8 +56,34 @@ class UserService {
                 return res
             })
     }
-    getPartnerProducts(){
-        return axios.get(API_URL + '/ownerProducts/<string:public_id>')
+
+    getPartnerProducts() {
+        const token = JSON.parse(localStorage.getItem("user") as string);
+
+        const header = {
+            "Authorization": `Bearer ${token.token}`,
+            "token": token.token,
+            "Content-Type": "application/json"
+        }
+
+
+        return axios.get(API_URL + `/ownerProducts/`, { headers: header })
+            .then((res) => {
+                return res
+            })
+    }
+
+
+    deleteProduct(product_id: any) {
+        const token = JSON.parse(localStorage.getItem("user") as string);
+
+        const header = {
+            "Authorization": `Bearer ${token.token}`,
+            "token": token.token,
+            "Content-Type": "application/json"
+        }
+
+        return axios.delete(API_URL + `/deleteProduct/${product_id}`, { headers: header })
     }
 
     getCustomers() {
@@ -70,7 +96,7 @@ class UserService {
 
     getFood() {
         return axios.get(API_URL + '/home', { headers: authHeader() as AxiosRequestHeaders })
-            .then((res)=>{
+            .then((res) => {
                 return res
             });
     }

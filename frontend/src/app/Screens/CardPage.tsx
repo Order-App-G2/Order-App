@@ -33,17 +33,17 @@ export class CardPage extends Component<CardPageProps, CardPageState> {
     handleSubmit = () => {
         this.props.cardItems.map((item) => {
             const orders: any[] = []
-          
-                const partner_id = item.partner_id
-                orders.push({
-                    product_id: item.product_id,
-                    quantity: 1
-                })
+
+            const partner_id = item.partner_id
+            orders.push({
+                product_id: item.product_id,
+                quantity: 1
+            })
 
             this.props.createOrder(partner_id, orders)
         })
-        
-       this.props.resetCard()
+
+        this.props.resetCard()
     }
 
     render() {
@@ -51,6 +51,7 @@ export class CardPage extends Component<CardPageProps, CardPageState> {
             <div className='cardItems'>
                 <div className='items'>
                     {this.renderCardItems()}
+                    {this.props.cardItems.length <= 0 && <h1>You dont have any product to your card</h1>}
                     <FormButton title='Submit' onClick={this.handleSubmit} />
                 </div>
             </div>

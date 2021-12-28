@@ -10,9 +10,11 @@ import {
     GET_PARTNER_FOOD_FAIL,
     ADD_TO_CARD_SUCESS,
     REMOVE_FROM_CARD,
-    CREATE_ORDER_SUCCESS, 
+    CREATE_ORDER_SUCCESS,
     CREATE_ORDER_FAIL,
-    RESET_CARD
+    RESET_CARD,
+    DELETE_PRODUCT_SUCCESS,
+    DELETE_PRODUCT_FAIL
 } from "../types";
 import UserService, { orderProduct } from "../../services/user.service"
 
@@ -51,7 +53,7 @@ export const createProduct = (title: string, content: string, price: number, cat
         )
 }
 
-export const createOrder = (partner_id: number , orders: orderProduct[]) => (dispatch: any) => {
+export const createOrder = (partner_id: number, orders: orderProduct[]) => (dispatch: any) => {
     return UserService.createOrder(partner_id, orders)
         .then((response) => {
             dispatch({
@@ -91,12 +93,12 @@ export const getCategory = () => (dispatch: any) => {
     return UserService.getAllCategory()
         .then((response) => {
             dispatch({
-                type: GET_CATEGORY_SUCCESS, 
+                type: GET_CATEGORY_SUCCESS,
                 payload: response.data
             })
             dispatch({
                 type: GET_CATEGORY_FAIL,
-                payload: response.data.message            
+                payload: response.data.message
             })
 
             return Promise.resolve();
@@ -108,12 +110,12 @@ export const getProduct = () => (dispatch: any) => {
     return UserService.getFood()
         .then((response) => {
             dispatch({
-                type: GET_FOOD_SUCCESS, 
+                type: GET_FOOD_SUCCESS,
                 payload: response.data
             })
             dispatch({
                 type: GET_FOOD_FAIL,
-                payload: response.data.message            
+                payload: response.data.message
             })
 
             return Promise.resolve();
@@ -123,19 +125,35 @@ export const getProduct = () => (dispatch: any) => {
 
 export const getPartnerProducts = () => (dispatch: any) => {
     return UserService.getPartnerProducts()
-    .then((response) => {
-        dispatch({
-            type: GET_PARTNER_FOOD_SUCCESS, 
-            payload: response.data
-        })
-        dispatch({
-            type: GET_PARTNER_FOOD_FAIL,
-            payload: response.data.message            
-        })
+        .then((response) => {
+            dispatch({
+                type: GET_PARTNER_FOOD_SUCCESS,
+                payload: response.data
+            })
+            dispatch({
+                type: GET_PARTNER_FOOD_FAIL,
+                payload: response.data.message
+            })
 
-        return Promise.resolve();
+            return Promise.resolve();
 
-    })
+        })
+}
+
+export const deleteProduct = (product_id: any) => (dispatch: any) => {
+    return UserService.deleteProduct(product_id)
+        .then((response) => {
+            dispatch({
+                type: DELETE_PRODUCT_SUCCESS,
+            })
+            dispatch({
+                type: DELETE_PRODUCT_FAIL,
+                payload: response.data.message
+            })
+
+            return Promise.resolve();
+
+        })
 }
 
 export const addToCard = (meal: any) => (dispatch: any) => {

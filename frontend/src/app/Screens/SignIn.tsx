@@ -62,15 +62,16 @@ export class SignIn extends Component<SignInProps, SignInState> {
 
         event.preventDefault();
 
-        this.setState({
-            success: false,
+    this.setState({
+        success: false,
         });
 
         this.props.login(this.state.userName, this.state.password, this.state.reCaptchaToken)
             .then(() => {
                 this.setState({
                     success: true,
-                });
+                },
+                );
             })
             .catch(() => {
                 this.setState({
@@ -111,7 +112,7 @@ export class SignIn extends Component<SignInProps, SignInState> {
 }
 function mapStateToProps(state: any) {
     return {
-        isLogedIn: state.authReducer.isLoggedIn
+        isLogedIn: state.authReducer.isLoggedIn,
     };
 }
 
