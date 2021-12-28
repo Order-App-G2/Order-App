@@ -10,7 +10,8 @@ import {
     CREATE_ORDER_FAIL,
     CREATE_ORDER_SUCCESS,
     GET_PARTNER_FOOD_SUCCESS,
-    GET_PARTNER_FOOD_FAIL
+    GET_PARTNER_FOOD_FAIL,
+    RESET_CARD
 } from "../types";
 
 const initialState = {
@@ -65,15 +66,20 @@ export default function (state = initialState, action: any) {
             return {
                 ...state,
             }
-            case GET_PARTNER_FOOD_SUCCESS:
-                return {
-                    ...state,
-                    partnerProducts: payload.products
-                }
-            case GET_PARTNER_FOOD_FAIL:
-                return {
-                    ...state,
-                }
+        case GET_PARTNER_FOOD_SUCCESS:
+            return {
+                ...state,
+                partnerProducts: payload.products
+            }
+        case GET_PARTNER_FOOD_FAIL:
+            return {
+                ...state,
+            }
+        case RESET_CARD:
+            return {
+                ...state,
+                cardItems: []
+            }
         case ADD_TO_CARD_SUCESS:
             return {
                 ...state,

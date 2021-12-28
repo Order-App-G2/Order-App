@@ -11,7 +11,8 @@ import {
     ADD_TO_CARD_SUCESS,
     REMOVE_FROM_CARD,
     CREATE_ORDER_SUCCESS, 
-    CREATE_ORDER_FAIL
+    CREATE_ORDER_FAIL,
+    RESET_CARD
 } from "../types";
 import UserService, { orderProduct } from "../../services/user.service"
 
@@ -141,6 +142,9 @@ export const addToCard = (meal: any) => (dispatch: any) => {
     return dispatch({ type: ADD_TO_CARD_SUCESS, payload: meal });
 }
 
+export const resetCard = () => (dispatch: any) => {
+    return dispatch({ type: RESET_CARD, });
+}
 
 export const removeFromCard = (index: number) => (dispatch: any) => {
     return dispatch({ type: REMOVE_FROM_CARD, payload: index });
