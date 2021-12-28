@@ -574,6 +574,7 @@ def get_all_product_by_owner(current_user):
         Product.title,
         Product.content,
         Product.price,
+        Product.id,
     ).join(Partner, Product.partner_id == Partner.public_id).filter(
         Product.partner_id == current_user.public_id).all()
 
@@ -582,6 +583,7 @@ def get_all_product_by_owner(current_user):
     for product in q:
         user_data = {
             'title': product.title,
+            'product_id': product.id,
             'content': product.content,
             'price': product.price,
         }
