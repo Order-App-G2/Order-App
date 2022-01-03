@@ -5,7 +5,7 @@ A group of students create a wonderful project
 1.Database download PostgreSQL. create database with the following command: create database Orders
 
 2.Change password in __inti__.py file in api folder
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:CHANGE HERE@localhost/Orders'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:CHANGEHERE@localhost/Orders'
 
 3.install venv in the project folder with the following command: 
 python -m venv env
