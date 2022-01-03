@@ -1,9 +1,9 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import App from './App';
+import CardPage from './CardPage';
 
 test('renders homepage', () => {
-  render(<App />);
-  const linkElement = screen.getByText('Delicious Food, Delivered To You');
+  render(<CardPage />);
+  const linkElement = screen.getByText('Cards');
   expect(linkElement).toBeInTheDocument();
 });
