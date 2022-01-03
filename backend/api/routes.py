@@ -554,23 +554,26 @@ def get_product_by_category(category):
     return jsonify({'products': output})
 
 
-@app.route('/ownerProducts/<string:public_id>', methods=['GET'])
-def get_all_product_by_owner(public_id):
+@app.route('/ownerProducts/', methods=['GET'])
+@token_required
+def get_all_product_by_owner(current_user):
+    if type(current_user) != Partner:
+        return jsonify({'message': 'Cannot perform that function '})
     q = db.session.query(
         Partner.username,
         Product.title,
         Product.content,
         Product.price,
+        Product.id,
     ).join(Partner, Product.partner_id == Partner.public_id).filter(
-        Product.partner_id == public_id).all()
+        Product.partner_id == current_user.public_id).all()
 
-    if not q:
-        return jsonify({'message': 'no user found '})
     output = []
 
     for product in q:
         user_data = {
             'title': product.title,
+            'product_id': product.id,
             'content': product.content,
             'price': product.price,
         }
