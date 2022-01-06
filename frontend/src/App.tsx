@@ -11,6 +11,7 @@ import AddProduct from './app/Screens/AddProduct';
 import Search from './app/Screens/Search';
 import CardPage from './app/Screens/CardPage';
 import PartnerProductList from './app/Screens/PartnerProductList';
+import ForgottenPassword from './app/Screens/ForgottenPassword';
 
 
 function App() {
@@ -25,6 +26,7 @@ function App() {
         <Route path="/card" element={<CardPage />} >
         </Route>
         <Route path="/Search"  element={<Search/>}/>
+        <Route path="/forgottenPassword" element={<ForgottenPassword/>} />
       </Routes>
     </Layout>
   );

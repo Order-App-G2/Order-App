@@ -78,5 +78,13 @@ class AuthService {
 
         return axios.post(API_URL + 'createCustomer', user);
     }
+
+    forgottenPassword(email: string) {
+        const body = {
+            email
+        }
+
+        return axios.post(API_URL + 'forgottenPassword', body);
+    }
 }
 export default new AuthService();

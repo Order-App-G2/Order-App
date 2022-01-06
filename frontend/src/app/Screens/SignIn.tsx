@@ -94,7 +94,8 @@ export class SignIn extends Component<SignInProps, SignInState> {
             <FormInput description="Password" placeholder="Enter your password" type="password" onChange={(e: any) => { this.setState({ password: e.target.value }) }} />
             <div className='reCaptcha'> <ReCAPTCHA onChange={this.handleRecaptchaChange} size="normal" sitekey={SITE_KEY} /> </div>
             <FormButton title="Log in" onClick={this.submitHandler} />
-            <p className='redirectToSignUp'>Need an account ? <Link to={{ pathname: '/signUp' }} className='signUp'> Sign up</Link></p>
+            <p className='redirectToSignUp'>Need an account? <Link to={{ pathname: '/signUp' }} className='signUp'> Sign up</Link></p>
+            <p className='redirectToSignUp'>Forgot your password? <Link to={{ pathname: '/forgottenPassword' }} className='signUp'> Click here</Link></p>
         </>)
     }
 
