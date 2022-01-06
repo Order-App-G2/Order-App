@@ -4,11 +4,13 @@ import jwt
 from api import app
 from api import RECAPTCHA_SECRET_KEY
 from api.models import *
-from flask import request, jsonify, make_response
+from flask import request, jsonify, make_response, render_template
+from flask_mail import Mail, Message
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
-import requests
+# import requests
 
+CLIENT_URL = 'http://loclalhost:3000'
 
 def token_required(f):
     @wraps(f)
@@ -48,11 +50,7 @@ def verify_recaptcha(token):
 def login():
     auth = request.authorization
     data = request.get_json()
-    token = data['token']
-    if not token:
-        return make_response('Not reCaptcha token', 401)
-    token_valid = verify_recaptcha(token)
-    if not auth or not auth.username or not auth.password or not token_valid:
+    if not auth or not auth.username or not auth.password:
         return make_response('Not verified', 401, {'WWW-Authenticate': ' Basic realm="Login required!" '})
     user = Customer.query.filter_by(username=auth.username).first() or Partner.query.filter_by(
         username=auth.username).first() or Courier.query.filter_by(username=auth.username).first()
@@ -67,6 +65,27 @@ def login():
         return jsonify({'token': token})
 
     return make_response('Not verified', 401, {'WWW-Authenticate': ' Basic realm="Login required!" '})
+
+@app.route('/forgottenPassword', methods=['POST'])
+def forgottenPassword():
+    data = request.get_json()
+    user = Customer.query.filter_by(public_id=data['public_id']).first() or Partner.query.filter_by(
+        public_id=data['public_id']).first() or Courier.query.filter_by(public_id=data['public_id']).first()
+
+    if not user:
+        return jsonify({'message': 'No user found with this email!'})
+
+    exp = datetime.utcnow() + timedelta(minutes=30)
+    reset_password_token = jwt.encode({'email': user.email, 'exp': exp}, app.config['SECRET_KEY'], algorithm="HS256")
+    reset_password_url = f'{CLIENT_URL}/resetPassword/{reset_password_token}'
+    
+    mail = Mail(app)
+    msg = Message('Order App Reset Password', sender=app.config['MAIL_USERNAME'], recipients=['stefanmitov8@gmail.com'])
+    msg.html = f'<h1>Click <a href={reset_password_url}>here</a> to reset your password</h1><span>This link is valid until {exp.strftime("%Y.%m.%d %H:%M")}</span>'
+    with app.app_context():
+        mail.send(msg)
+
+    return jsonify({ 'message': 'Email sent!' })
 
 
 # create customer user
@@ -111,7 +130,6 @@ def create_customer():
     return jsonify({'customer id': new_customer.public_id,
                     'username': new_customer.username,
                     'email': new_customer.email})
-
 
 # create shop account
 @app.route('/createPartner', methods=['POST'])
