@@ -80,11 +80,12 @@ class AuthService {
     }
 
     forgottenPassword(email: string) {
-        const body = {
-            email
-        }
+        return axios.post(API_URL + 'forgottenPassword', {email});
+    }
 
-        return axios.post(API_URL + 'forgottenPassword', body);
+    resetPassword(token: string, password: string){
+        return axios.post(API_URL + '/reset_login/'+token, {password});
     }
 }
+
 export default new AuthService();

@@ -12,7 +12,7 @@ import Search from './app/Screens/Search';
 import CardPage from './app/Screens/CardPage';
 import PartnerProductList from './app/Screens/PartnerProductList';
 import ForgottenPassword from './app/Screens/ForgottenPassword';
-
+import NewPassword from './app/Screens/NewPassword';
 
 function App() {
   return (
@@ -27,6 +27,7 @@ function App() {
         </Route>
         <Route path="/Search"  element={<Search/>}/>
         <Route path="/forgottenPassword" element={<ForgottenPassword/>} />
+        <Route path="/resetPassword/:token" element={<NewPassword/>} />
       </Routes>
     </Layout>
   );
