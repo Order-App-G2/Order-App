@@ -87,6 +87,30 @@ def forgottenPassword():
 
     return jsonify({ 'message': 'Email sent!' })
 
+@app.route('/reset_login/<string:token>', methods=['PUT'])
+def new_password(token):
+     try:
+            data = jwt.decode(token, app.config['SECRET_KEY'], algorithms='HS256')
+            current_user = Customer.query.filter_by(public_id=data['public_id']).first() or Courier.query.filter_by(
+                public_id=data['public_id']).first() or Partner.query.filter_by(public_id=data['public_id']).first()
+
+        except:
+            return jsonify({'message': 'Token is invalid'}), 401
+
+        user_data = request.get_json() 
+        if not user_data['password']: 
+            return jsonify({'message': 'The password is missing!'}), 400  
+
+        hashed_password = generate_password_hash(user_data['password'], method='sha256')
+        current_user.password = hashed_password
+        
+        db.session.commit()
+        return jsonify({'public_id': current_user.public_id,
+                        'username': current_user.username,
+                        'email': current_user.email,
+                        'phone_number': current_user.phoneNumber,
+                        'address': current_user.address,
+                        'message': 'Password has been updated!'})
 
 # create customer user
 @app.route('/createCustomer', methods=['POST'])
