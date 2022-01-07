@@ -84,7 +84,7 @@ class AuthService {
     }
 
     resetPassword(token: string, password: string){
-        return axios.post(API_URL + '/reset_login/'+token, {password});
+        return axios.put(API_URL + '/reset_login/'+token, {password});
     }
 }
 

@@ -10,7 +10,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 # import requests
 
-CLIENT_URL = 'http://loclalhost:3000'
+CLIENT_URL = 'http://localhost:3000'
 
 def token_required(f):
     @wraps(f)
@@ -69,16 +69,16 @@ def login():
 @app.route('/forgottenPassword', methods=['POST'])
 def forgottenPassword():
     data = request.get_json()
-    user = Customer.query.filter_by(public_id=data['public_id']).first() or Partner.query.filter_by(
-        public_id=data['public_id']).first() or Courier.query.filter_by(public_id=data['public_id']).first()
+    user = Customer.query.filter_by(email=data['email']).first() or Partner.query.filter_by(
+        email=data['email']).first() or Courier.query.filter_by(email=data['email']).first()
 
     if not user:
         return jsonify({'message': 'No user found with this email!'})
 
     exp = datetime.utcnow() + timedelta(minutes=30)
-    reset_password_token = jwt.encode({'email': user.email, 'exp': exp}, app.config['SECRET_KEY'], algorithm="HS256")
+    reset_password_token = jwt.encode({'public_id': user.public_id, 'exp': exp}, app.config['SECRET_KEY'], algorithm="HS256")
     reset_password_url = f'{CLIENT_URL}/resetPassword/{reset_password_token}'
-    
+
     mail = Mail(app)
     msg = Message('Order App Reset Password', sender=app.config['MAIL_USERNAME'], recipients=['stefanmitov8@gmail.com'])
     msg.html = f'<h1>Click <a href={reset_password_url}>here</a> to reset your password</h1><span>This link is valid until {exp.strftime("%Y.%m.%d %H:%M")}</span>'
@@ -89,28 +89,28 @@ def forgottenPassword():
 
 @app.route('/reset_login/<string:token>', methods=['PUT'])
 def new_password(token):
-     try:
-            data = jwt.decode(token, app.config['SECRET_KEY'], algorithms='HS256')
-            current_user = Customer.query.filter_by(public_id=data['public_id']).first() or Courier.query.filter_by(
-                public_id=data['public_id']).first() or Partner.query.filter_by(public_id=data['public_id']).first()
+    try:
+        data = jwt.decode(token, app.config['SECRET_KEY'], algorithms='HS256')
+        current_user = Customer.query.filter_by(public_id=data['public_id']).first() or Courier.query.filter_by(
+            public_id=data['public_id']).first() or Partner.query.filter_by(public_id=data['public_id']).first()
 
-        except:
-            return jsonify({'message': 'Token is invalid'}), 401
+    except:
+        return jsonify({'message': 'Token is invalid'}), 401
 
-        user_data = request.get_json() 
-        if not user_data['password']: 
-            return jsonify({'message': 'The password is missing!'}), 400  
+    user_data = request.get_json() 
+    if not user_data['password']: 
+        return jsonify({'message': 'The password is missing!'}), 400  
 
-        hashed_password = generate_password_hash(user_data['password'], method='sha256')
-        current_user.password = hashed_password
+    hashed_password = generate_password_hash(user_data['password'], method='sha256')
+    current_user.password = hashed_password
         
-        db.session.commit()
-        return jsonify({'public_id': current_user.public_id,
-                        'username': current_user.username,
-                        'email': current_user.email,
-                        'phone_number': current_user.phoneNumber,
-                        'address': current_user.address,
-                        'message': 'Password has been updated!'})
+    db.session.commit()
+    return jsonify({'public_id': current_user.public_id,
+                    'username': current_user.username,
+                    'email': current_user.email,
+                    'phone_number': current_user.phoneNumber,
+                    'address': current_user.address,
+                    'message': 'Password has been updated!'})
 
 # create customer user
 @app.route('/createCustomer', methods=['POST'])

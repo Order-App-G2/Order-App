@@ -11,17 +11,18 @@ const NewPassword: React.FC = (props: any) => {
   const [message, setMessage] = useState('');
 
   const handleSubmit = async () => {
-    if (resetPassword != confirmPassword){
-        setMessage("Passwords are not the same!")
-        return }
-    const { data } = await AuthService.resetPassword(token, resetPassword);
+    if (resetPassword !== confirmPassword) {
+      setMessage("Passwords are not the same!")
+      return 
+    }
+    const { data } = await AuthService.resetPassword(token!, resetPassword);
     setMessage(data.message);
   };
 
   return <>
     <FormHeader title="New Password"/>
-    <FormInput placeholder="New password" value={resetPassword} onChange={(e: any) => setResetPassword(e.target.value)} />
-    <FormInput placeholder="Confirm new password" value={confirmPassword} onChange={(e: any) => setConfirmPassword(e.target.value)} />
+    <FormInput type="password" placeholder="New password" value={resetPassword} onChange={(e: any) => setResetPassword(e.target.value)} />
+    <FormInput type="password" placeholder="Confirm new password" value={confirmPassword} onChange={(e: any) => setConfirmPassword(e.target.value)} />
     <FormButton title="Change" onClick={handleSubmit}/>
     <label className='row'>{message}</label>
   </>
