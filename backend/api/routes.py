@@ -80,7 +80,7 @@ def forgottenPassword():
     reset_password_url = f'{CLIENT_URL}/resetPassword/{reset_password_token}'
 
     mail = Mail(app)
-    msg = Message('Order App Reset Password', sender=app.config['MAIL_USERNAME'], recipients=['stefanmitov8@gmail.com'])
+    msg = Message('Order App Reset Password', sender=app.config['MAIL_USERNAME'], recipients=[user.email])
     msg.html = f'<h1>Click <a href={reset_password_url}>here</a> to reset your password</h1><span>This link is valid until {exp.strftime("%Y.%m.%d %H:%M")}</span>'
     with app.app_context():
         mail.send(msg)
