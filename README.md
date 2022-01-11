@@ -27,3 +27,6 @@ db.create_all()
 9. make sure you dont have any error in the cmd window
 open pgadmin. make sure you have all the tables there.
  
+ Project documentation: 
+[CT[Софтуерна-архитектура.pdf](https://github.com/Order-App-G2/Order-App/files/7845622/-.pdf)
+-Задание.pdf](https://github.com/Order-App-G2/Order-App/files/7845618/CT-.pdf)
