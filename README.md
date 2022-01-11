@@ -26,6 +26,14 @@ db.create_all()
 
 9. make sure you dont have any error in the cmd window
 open pgadmin. make sure you have all the tables there.
+
+Starting frontend 
+
+10. cd frontend 
+
+12. npm install
+
+14. npm run start 
  
  Project documentation: 
 [CT[Софтуерна-архитектура.pdf](https://github.com/Order-App-G2/Order-App/files/7845622/-.pdf)
