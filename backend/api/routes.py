@@ -105,12 +105,7 @@ def new_password(token):
     current_user.password = hashed_password
         
     db.session.commit()
-    return jsonify({'public_id': current_user.public_id,
-                    'username': current_user.username,
-                    'email': current_user.email,
-                    'phone_number': current_user.phoneNumber,
-                    'address': current_user.address,
-                    'message': 'Password has been updated!'})
+    return jsonify({'message': 'Password has been updated!'})
 
 # create customer user
 @app.route('/createCustomer', methods=['POST'])
